@@ -9,329 +9,90 @@ output:
     code_folding: hide
 ---
 
-lncRNAs have been reported to play an important role in cellular biological processes such as gene regulation and have also been reported to be highly cell type specific. Previously, lncRNAs have beeen shown to be differentially expressed in pediatric acute lymphoblastic leukemia with MLL t(11q23) translocations and specific expression of these lncRNAs was demonstrated to be important in regulation of the disease phenotype. Due to these reasons, we hypothesized that lncRNA expression may also be capable of distinguishing known hematopoetic malagnancies and is therefore, potentially, important for refulating specific gene expression driving these diseases.
+###Read Me
+For those not desiring to re-run the whole analysis from scratch, but wanting to explore and re-create the published analysis, the minimal necessary data has been included in the ClusterSignificanceTesting package to achieve this. This included data is utilized when knitting this document.
+
+If you desire to re-run the whole code rom scratch to re-create the analysis, we warn you that it can take some time. Depending on your system, the _hematologicalCancers_ function may take hours to days to run. Due to this fact, the chunk containing that function is set to eval=FALSE. We recommend running the _hematologicalCancers_ function as demonstrated in this document, save the output to your local system, and execute the downstream commands after the output from the _hematologicalCancers_ function is loaded into R. Please note, due to the nature of t-SNE, results for the clustering may not look the same if t-SNE is re-run.
+
+To increase reproducability, all of the functions needed to re-create supplementary fig. 2 are included in the raw package code but are also shown at the end of this document for convienience.
+
+##Introduction
+lncRNAs have been reported to play an important role in cellular biological processes such as gene regulation and have also been reported to be highly cell type specific. Previously, lncRNAs have beeen shown to be differentially expressed in pediatric acute lymphoblastic leukemia with MLL t(11q23) translocations and specific expression of these lncRNAs was demonstrated to be important in regulation of the disease phenotype. Due to these reasons, we hypothesized that lncRNA expression may also be capable of distinguishing known hematopoetic malagnancies and is therefore, potentially, important for regulating specific gene expression driving these diseases.
 
 To test this hypothesis, we utilized the ClusterSignificance package to test for specific hematological malagnancy group seperations after running the tSNE algorithm using only lncRNA expression profiles as input. Specifically we utilized the GSE13159 dataset comprised of microarray gene expression data from 6 well characterised hematological malagnancies. We extracted 5165 probes detecting lncRNA from the expression data representing 4283 individual genes. Multidimensional reduction was then performed using the tSNE algorithm by inputing only the expression values of the lncRNAs. The ClusterSignificance Pcp method was then utilized to determine significant seperations within the known hematological malagnancies.
 
-The results indicate that, of the 21 group comparisons made 18 of those were found to exhibit a significant seperation with 10000 iterations of permutation. These results indicate that lncRNA expression profiles are, in many cases, able to differentiate many common hematological malagnancies and, thus, may be important for disease progression and identity.
+The results indicate that, of the 21 group comparisons made 20 of those were found to exhibit a significant seperation with 10000 iterations of permutation. The 'normal vs MDS' comparison seems to not show a significant seperation due to the inability of t-SNE to significantly seperate these two groups, most likely, due to their relative similarity. These results indicate that lncRNA expression profiles are able to differentiate many common hematological malagnancies and, thus, may be important for disease progression and identity.
 
-## Download data and extract lncRNAs
-```{r, message=FALSE, warning=FALSE}
-library(GEOquery)
+```{r style, echo = FALSE, results = 'asis', warning=FALSE, message=FALSE}
+BiocStyle::markdown()
+library(knitr)
+library(ClusterSignificanceTesting)
+##the function below allows dynamic insertion of the function source code 
+insert_fun = function(name) {
+    read_chunk(
+      lines = capture.output(dump(name, '')), 
+      labels = paste(name, 'source', sep = '-')
+    )
+}
 ```
 
-```{r, echo=FALSE}
-load('/Users/jasonserviss/GitHub/ClusterSignificanceTestingSuite/inst/hematologicalMalag/GSE13159.rda')
+```{r, eval=TRUE}
+library(scatterplot3d)
+library(printr)
+library(grid)
+library(gridBase)
+library(gridExtra)
 ```
 
 ```{r, eval=FALSE}
-#download data
-gset <- getGEO("GSE13159", GSEMatrix =TRUE)[[1]]
-save(gset, file='/Users/jasonserviss/GitHub/ClusterSignificanceTestingSuite/inst/hematologicalMalag/GSE13159.rda', compress="bzip2")
-```
-
-```{r, message=FALSE, warning=FALSE}
-#extract expression values, remove incomplete cases, and get phenotype data
-fvarLabels(gset) <- make.names(fvarLabels(gset))
-ex <- as.data.frame(exprs(gset))
-exp <- ex[complete.cases(ex),]
-pheno <- pData(phenoData(gset))
-
-#annotate probe ids with ensembl IDs and biotypes
-ensembl = biomaRt::useMart(
-    biomart = "ENSEMBL_MART_ENSEMBL",
-    dataset="hsapiens_gene_ensembl", 
-    host = "jul2015.archive.ensembl.org"
-)
-
-affyids = rownames(exp)
-IDs <- biomaRt::getBM(
-    attributes=c(
-        'affy_hg_u133_plus_2', 
-        'ensembl_gene_id', 
-        'external_gene_name', 
-        'chromosome_name',
-        'start_position',
-        'end_position', 
-        'gene_biotype'
-    ), 
-    filters = 'affy_hg_u133_plus_2', 
-    values = affyids, 
-    mart = ensembl
-)
-
-colnames(IDs) = c(
-    "probe_id", 
-    "ensembl_gene_id", 
-    "external_gene_name", 
-    "chromosome_name", 
-    "start_position", 
-    "end_position", 
-    "gene_biotype"
-)
-
-#remove probes that are duplicated if any
-IDs = subset(
-    IDs, 
-    duplicated(IDs$probe_id) == FALSE & 
-    duplicated(IDs$probe_id, fromLast=TRUE) == FALSE
-) 
-
-#merge annotation with expression data and extract lncRNA biotypes
-exp <- merge(exp, IDs, by.x=0, by.y="probe_id")
-ncGenes <- c(
-    "3prime_overlapping_ncrna", 
-    "antisense", 
-    "IG_V_pseudogene", 
-    "lincRNA", 
-    "misc_RNA", 
-    "polymorphic_pseudogene", 
-    "processed_pseudogene", 
-    "processed_transcript", 
-    "pseudogene", 
-    "sense_intronic", 
-    "sense_overlapping", 
-    "TR_V_pseudogene", 
-    "transcribed_processed_pseudogene", 
-    "transcribed_unitary_pseudogene", 
-    "transcribed_unprocessed_pseudogene", 
-    "unitary_pseudogene", 
-    "unprocessed_pseudogene"
-)
-
-nc <- exp[exp$gene_biotype %in% ncGenes, ]
-rownames(nc) <- nc$Row.names
-nc$Row.names <- NULL
-
-```
-
-```{r}
-#change names of genetic subtypes to something more readable
-pheno$characteristics_ch1.1 <- gsub(
-    "leukemia class: (.*)", 
-    "\\1", 
-    pheno$characteristics_ch1.1
-)
-
-Ball <- c("ALL with hyperdiploid karyotype", "ALL with t(1;19)", "ALL with t(12;21)", "c-ALL/Pre-B-ALL with t(9;22)", "c-ALL/Pre-B-ALL without t(9;22)", "mature B-ALL with t(8;14)", "Pro-B-ALL with t(11q23)/MLL")
-aml <- c("AML complex aberrant karyotype", "AML with inv(16)/t(16;16)", "AML with normal karyotype + other abnormalities", "AML with t(11q23)/MLL", "AML with t(15;17)", "AML with t(8;21)")
-
-
-pheno$characteristics_ch1.1 <- ifelse(
-    pheno$characteristics_ch1.1 %in% Ball, 
-    "B-ALL", 
-    ifelse(
-        pheno$characteristics_ch1.1 %in% aml, 
-        "AML", 
-        ifelse(
-            pheno$characteristics_ch1.1 == "T-ALL", 
-            "T-ALL", 
-            ifelse(
-                pheno$characteristics_ch1.1 == "Non-leukemia and healthy bone marrow", 
-                "Non-leukemia and healthy bone marrow", 
-                ifelse(
-                    pheno$characteristics_ch1.1 == "CML", 
-                    "CML", 
-                    ifelse(
-                        pheno$characteristics_ch1.1 == "CLL", 
-                        "CLL", 
-                        "MDS"
-                    )
-                )
-            )
-        )
-    )
-)
-
-pheno$characteristics_ch1.1 <- ifelse(pheno$characteristics_ch1.1 == "Non-leukemia and healthy bone marrow", "normal", pheno$characteristics_ch1.1)
+data <- hematologicalCancers()
+hemCancData <- data[[1]]
+group.color <- data[[2]]
+prj <- data[[3]]
+cl <- data[[4]]
+pe <- data[[5]]
+pValues <- data[[6]]
+mat <- data[[7]]
+groups <- data[[8]]
+nc <- data[[9]]
+lncGenes <- data[[10]]
 ```
 
 ##Dataset stats
 ####Number of unique long non-coding genes
-```{r}
-library(printr)
+```{r, eval=TRUE}
 #number of unique genes
-length(unique(nc$ensembl_gene_id))
+length(unique(lncGenes))
 ```
 
 ####Number of samples in each genetic subtype
-```{r}
+```{r, eval=TRUE}
 #number of samples in each subtype
-table(pheno$characteristics_ch1.1)
+table(hemCancData$characteristics_ch1.1)
 ```
 
-## Run tSNE and plot {.tabset}
-```{r, eval=FALSE}
-#run tsne using lncRNA biotypes only
-library(Rtsne)
-tsne <- Rtsne(t(
-    nc[ ,!colnames(nc) %in% c(
-        "Row.names", 
-        "probe_id", 
-        "ensembl_gene_id", 
-        "external_gene_name", 
-        "chromosome_name", 
-        "start_position", 
-        "end_position", 
-        "gene_biotype"
-    )]
-), dims=3)
-
-#put tSNE results and phenotype data in a data.frame
-plot <- data.frame(tsne$Y, pheno)
-```
-
-```{r, echo=FALSE}
-load('/Users/jasonserviss/GitHub/ClusterSignificanceTestingSuite/inst/hematologicalMalag/wrappedData.rda')
-```
-
+##t-SNE plots {.tabset}
+###dim X
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
-#run ClusterSignificance projection so colors match in tSNE plots and ClusterSignificance plots
-library(ClusterSignificance)
-mat <- as.matrix(plot[ ,c("X1", "X2", "X3")])
-groups <- plot$characteristics_ch1.1
-prj <- pcp(mat, groups)
-group.color <- getData(prj, "group.color")
+tsnePlots(hemCancData, "X")
 ```
 
-### Dim X
+###dim Y
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
-#plot tSNE results
-library(scatterplot3d)
-p <- scatterplot3d(
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X1"], 
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X2"], 
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X3"], 
-    color=rgb(
-            group.color["red",   colnames(group.color)[1]],
-            group.color["green", colnames(group.color)[1]],
-            group.color["blue",  colnames(group.color)[1]],
-            150,
-            maxColorValue=255
-    ),
-    pch=16,
-    box=FALSE,
-    xlab="X",
-    ylab="Y",
-    zlab="Z",
-    xlim=c(min(plot$X1), max(plot$X1)),
-    ylim=c(min(plot$X2), max(plot$X2)),
-    zlim=c(min(plot$X3), max(plot$X3))
-
-)
-
-invisible(
-    sapply(2:length(unique(groups)), function(x)
-        p$points3d(
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X1"],
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X2"],
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X3"],
-            col=rgb(
-                group.color["red",   colnames(group.color)[x]],
-                group.color["green", colnames(group.color)[x]],
-                group.color["blue",  colnames(group.color)[x]],
-                150,
-                maxColorValue=255
-            ),
-            pch=16,
-            cex = 1
-        )
-    )
-)
+tsnePlots(hemCancData, "Y")
 ```
 
-### Dim Y
+###dim Z
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
-
-p <- scatterplot3d(
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X2"], 
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X1"], 
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X3"], 
-    color=rgb(
-            group.color["red",   colnames(group.color)[1]],
-            group.color["green", colnames(group.color)[1]],
-            group.color["blue",  colnames(group.color)[1]],
-            150,
-            maxColorValue=255
-    ),
-    pch=16,
-    box=FALSE,
-    xlab="Y",
-    ylab="X",
-    zlab="Z",
-    xlim=c(min(plot$X2), max(plot$X2)),
-    ylim=c(min(plot$X1), max(plot$X1)),
-    zlim=c(min(plot$X3), max(plot$X3))
-
-)
-
-invisible(
-    sapply(2:length(unique(groups)), function(x)
-        p$points3d(
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X2"],
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X1"],
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X3"],
-            col=rgb(
-                group.color["red",   colnames(group.color)[x]],
-                group.color["green", colnames(group.color)[x]],
-                group.color["blue",  colnames(group.color)[x]],
-                150,
-                maxColorValue=255
-            ),
-            pch=16,
-            cex = 1
-        )
-    )
-)
-```
-
-### Dim Z
-```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
-p <- scatterplot3d(
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X3"], 
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X2"], 
-    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X1"], 
-    color=rgb(
-            group.color["red",   colnames(group.color)[1]],
-            group.color["green", colnames(group.color)[1]],
-            group.color["blue",  colnames(group.color)[1]],
-            150,
-            maxColorValue=255
-    ),
-    pch=16,
-    box=FALSE,
-    xlab="Z",
-    ylab="Y",
-    zlab="X",
-    xlim=c(min(plot$X3), max(plot$X3)),
-    ylim=c(min(plot$X2), max(plot$X2)),
-    zlim=c(min(plot$X1), max(plot$X1))
-
-)
-
-invisible(
-    sapply(2:length(unique(groups)), function(x)
-        p$points3d(
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X3"],
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X2"],
-            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X1"],
-            col=rgb(
-                group.color["red",   colnames(group.color)[x]],
-                group.color["green", colnames(group.color)[x]],
-                group.color["blue",  colnames(group.color)[x]],
-                150,
-                maxColorValue=255
-            ),
-            pch=16,
-            cex = 1
-        )
-    )
-)
+tsnePlots(hemCancData, "Z")
 ```
 
 ## ClusterSignificance Projection {.tabset}
 ### all steps
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+mat <- as.matrix(hemCancData[ ,c("X1", "X2", "X3")])
+groups <- hemCancData$characteristics_ch1.1
+prj <- pcp(mat, groups)
 plot(prj)
 ```
 
@@ -478,18 +239,8 @@ plot(cl, comparison=names(getData(cl, "scores"))[21])
 
 
 ##ClusterSignificance Permutation {.tabset}
-```{r, message=FALSE, eval=FALSE}
-pe <- permute(mat, groups, iter=10000, projmethod="pcp")
-```
-
-```{r, echo=FALSE}
-#load permutation results
-load('~/Github/ClusterSignificanceTestingSuite/inst/hematologicalMalag/run/hemaMalaTestResults.rda')
-```
-
 ### p-Value table
-```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
-library(printr)
+```{r, eval=TRUE}
 pValues <- as.data.frame(pvalue(pe))
 colnames(pValues) <- "pValue"
 ```
@@ -604,138 +355,141 @@ plot(pe, comparison=names(getData(pe, "scores.vec"))[21])
 ```
 
 ##Investigate the lack of a significant seperation between the MDS and normal groups {.tabset}
+The results indicate that after tSNE the normal and MDS represent a reasonably homogenous cluster and therefore, it may be expected that ClusterSignificance would not detect a significant seperation of these groups.
+
 ###view 1
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
-inv <- subset(plot, characteristics_ch1.1 == "normal" | characteristics_ch1.1 == "MDS")
-
-p <- scatterplot3d(
-    inv[inv$characteristics_ch1.1 == "normal", "X1"], 
-    inv[inv$characteristics_ch1.1 == "normal", "X2"], 
-    inv[inv$characteristics_ch1.1 == "normal", "X3"], 
-    color=rgb(
-            group.color["red",   "normal"],
-            group.color["green", "normal"],
-            group.color["blue",  "normal"],
-            150,
-            maxColorValue=255
-    ),
-    pch=16,
-    box=FALSE,
-    xlab="X",
-    ylab="Y",
-    zlab="Z",
-    xlim=c(min(inv$X1), max(inv$X1)),
-    ylim=c(min(inv$X2), max(inv$X2)),
-    zlim=c(min(inv$X3), max(inv$X3))
-
-)
-
-invisible(
-    sapply(2:length(unique(groups)), function(x)
-        p$points3d(
-            inv[inv$characteristics_ch1.1 == "MDS", "X1"],
-            inv[inv$characteristics_ch1.1 == "MDS", "X2"],
-            inv[inv$characteristics_ch1.1 == "MDS", "X3"],
-            col=rgb(
-                group.color["red",   "MDS"],
-                group.color["green", "MDS"],
-                group.color["blue",  "MDS"],
-                150,
-                maxColorValue=255
-            ),
-            pch=16,
-            cex = 1
-        )
-    )
-)
+normalMDS(hemCancData, 1)
 ```
 
 ###view 2
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
-
-p <- scatterplot3d(
-    inv[inv$characteristics_ch1.1 == "normal", "X2"], 
-    inv[inv$characteristics_ch1.1 == "normal", "X1"], 
-    inv[inv$characteristics_ch1.1 == "normal", "X3"], 
-    color=rgb(
-            group.color["red",   "normal"],
-            group.color["green", "normal"],
-            group.color["blue",  "normal"],
-            150,
-            maxColorValue=255
-    ),
-    pch=16,
-    box=FALSE,
-    xlab="X",
-    ylab="Y",
-    zlab="Z",
-    xlim=c(min(inv$X2), max(inv$X2)),
-    ylim=c(min(inv$X1), max(inv$X1)),
-    zlim=c(min(inv$X3), max(inv$X3))
-
-)
-
-invisible(
-    sapply(2:length(unique(groups)), function(x)
-        p$points3d(
-            inv[inv$characteristics_ch1.1 == "MDS", "X2"],
-            inv[inv$characteristics_ch1.1 == "MDS", "X1"],
-            inv[inv$characteristics_ch1.1 == "MDS", "X3"],
-            col=rgb(
-                group.color["red",   "MDS"],
-                group.color["green", "MDS"],
-                group.color["blue",  "MDS"],
-                150,
-                maxColorValue=255
-            ),
-            pch=16,
-            cex = 1
-        )
-    )
-)
+normalMDS(hemCancData, 2)
 ```
 
 ###view 3
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+normalMDS(hemCancData, 3)
+```
 
-p <- scatterplot3d(
-    inv[inv$characteristics_ch1.1 == "normal", "X3"], 
-    inv[inv$characteristics_ch1.1 == "normal", "X2"], 
-    inv[inv$characteristics_ch1.1 == "normal", "X1"], 
-    color=rgb(
-            group.color["red",   "normal"],
-            group.color["green", "normal"],
-            group.color["blue",  "normal"],
-            150,
-            maxColorValue=255
-    ),
-    pch=16,
-    box=FALSE,
-    xlab="X",
-    ylab="Y",
-    zlab="Z",
-    xlim=c(min(inv$X3), max(inv$X3)),
-    ylim=c(min(inv$X2), max(inv$X2)),
-    zlim=c(min(inv$X1), max(inv$X1))
+## Re-create Supplementary Fig. 2 from publication
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+#format pvalues for easier plotting
+pValues <- as.data.frame(round(pvalue(pe), digits=6))
+colnames(pValues) <- "pValues"
+pValues$pValues <- ifelse(pValues$pValues == 0.0001, paste("<", 0.0001, sep=""), pValues$pValues)
 
-)
+#adjut layout for 2 plots
+layout(matrix(c(1,2), nrow=1), widths=c(7,3))
 
-invisible(
-    sapply(2:length(unique(groups)), function(x)
-        p$points3d(
-            inv[inv$characteristics_ch1.1 == "MDS", "X3"],
-            inv[inv$characteristics_ch1.1 == "MDS", "X2"],
-            inv[inv$characteristics_ch1.1 == "MDS", "X1"],
-            col=rgb(
-                group.color["red",   "MDS"],
-                group.color["green", "MDS"],
-                group.color["blue",  "MDS"],
-                150,
-                maxColorValue=255
-            ),
-            pch=16,
-            cex = 1
-        )
-    )
-)
+#plot
+plot(prj, steps=2, alpha=0.75, cex.lab = 1.5, cex.axis = 1)
+
+#table
+frame()
+vps <- baseViewports()
+pushViewport(vps$inner, vps$figure, vps$plot)
+grob <-  tableGrob(pValues)
+grid.draw(grob)
+popViewport(3)
+```
+
+##Functions {.tabset}
+```{r sourceLoad, echo=FALSE}
+#hematologicalCancers
+insert_fun("hematologicalCancers")
+.downloadAndProcessData <- ClusterSignificanceTesting:::.downloadAndProcessData
+insert_fun(".downloadAndProcessData")
+.annotateBiotypes <- ClusterSignificanceTesting:::.annotateBiotypes
+insert_fun(".annotateBiotypes")
+.filterLongNonCoding <- ClusterSignificanceTesting:::.filterLongNonCoding
+insert_fun(".filterLongNonCoding")
+.renamePhenos <- ClusterSignificanceTesting:::.renamePhenos
+insert_fun(".renamePhenos")
+.runTsne <- ClusterSignificanceTesting:::.runTsne
+insert_fun(".runTsne")
+.runPcp <- ClusterSignificanceTesting:::.runPcp
+insert_fun(".runPcp")
+
+#tsnePlots
+insert_fun("tsnePlots")
+.dimX <- ClusterSignificanceTesting:::.dimX
+insert_fun(".dimX")
+.dimY <- ClusterSignificanceTesting:::.dimY
+insert_fun(".dimY")
+.dimZ <- ClusterSignificanceTesting:::.dimZ
+insert_fun(".dimZ")
+
+#normalMDS plots
+insert_fun("normalMDS")
+.view1 <- ClusterSignificanceTesting:::.view1
+insert_fun(".view1")
+.view2 <- ClusterSignificanceTesting:::.view2
+insert_fun(".view2")
+.view3 <- ClusterSignificanceTesting:::.view3
+insert_fun(".view3")
+```
+
+### hematologicalCancers function
+
+#### hematologicalCancers
+```{r, hematologicalCancers-source}
+```
+
+##### .downloadAndProcessData
+```{r, .downloadAndProcessData-source}
+```
+
+##### .annotateBiotypes
+```{r, .annotateBiotypes-source}
+```
+
+##### .filterLongNonCoding
+```{r, .filterLongNonCoding-source}
+```
+
+##### .renamePhenos
+```{r, .renamePhenos-source}
+```
+
+##### .runTsne
+```{r, .runTsne-source}
+```
+
+##### .runPcp
+```{r, hematologicalCancers-source}
+```
+
+### tsnePlots function
+#### tsnePlots
+```{r, tsnePlots-source}
+```
+
+##### .dimX
+```{r, .dimX-source}
+```
+
+##### .dimY
+```{r, .dimY-source}
+```
+
+##### .dimZ
+```{r, .dimZ-source}
+```
+
+### normalMDS function
+#### normalMDS
+```{r, normalMDS-source}
+```
+
+##### .view1
+```{r, .view1-source}
+```
+
+##### .view2
+```{r, .view2-source}
+```
+
+##### .view3
+```{r, .view3-source}
 ```

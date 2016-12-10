@@ -28,11 +28,11 @@ mat <- makeMatrix(x=c(0,1), y=c(1.1,2.1), dim=2, points=20)
 groups <- makeGroups(mat, c("g1", "g2"))
 calculateOverlap(mat, groups)
 }
-\references{
-\url{https://en.wikipedia.org/wiki/Convex_hull}
-}
 \author{
 Jason Serviss
+}
+\references{
+\url{https://en.wikipedia.org/wiki/Convex_hull}
 }
 \keyword{calculateOverlap}
 
