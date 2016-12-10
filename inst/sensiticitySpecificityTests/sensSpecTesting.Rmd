@@ -1,0 +1,321 @@
+---
+title: "Sensivity and Specificity Testing"
+author: "Jason T. Serviss"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    theme: flatly
+    toc: yes
+    code_folding: hide
+vignette: >
+  %\VignetteIndexEntry{ClusterSignificance Vignette} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\usepackage[utf8]{inputenc}
+  %\SweaveUTF8
+---
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  
+  .rawCode {
+    font-size: 160%
+  }
+</style>
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+library(printr)
+library(knitr)
+
+##the function below allows dynamic insertion of the function source code 
+insert_fun = function(name) {
+    read_chunk(
+      lines = capture.output(dump(name, '')), 
+      labels = paste(name, 'source', sep = '-')
+    )
+}
+```
+
+<br></br><br></br>
+
+```{r library, message=FALSE}
+library(ClusterSignificanceTestingSuite)
+```
+
+To test ClusterSignificance's sensivity and specificity two datasets were generated using the [zeroOrHundred][Dataset Generation Functions] function. The first of these datasets, [zero][Datasets] was designed to test the sensitivity of ClusterSignificance. It contains input matrixes to ClusterSignificance representing 2 groups in 2 dimensions which have zero percent overlap with each other. Technically this means that, no points from one group occupy the same space as any of the points from the other group. Here we expect ClusterSignificance to detect a significant seperation for each test. The dataset includes ClusterSignificance input matrixes which have different numbers of data points for each group; from 5 to 100. As well, the dataset includes 10 repititions for each number of points per group.
+
+The second of the gererated datasets, named [hundred][Datasets], was designed to test ClusterSignificance's specificity. It has a similar composition as the zero dataset except for the fact that the groups have 100 percent overlap instead of zero. 100 percent overlap, in this context, means that the space which one group occupies is totally overlapping the space of the other group.
+
+In the plots below we show examples from each dataset.
+
+# Dataset Examples {.tabset}
+
+The plots below show example matrices from the zero and hundred datasets for points per group equal to 10 and 100. The plot for the zero dataset indicate, as expected, that group 1 and group 2 have zero spatial overlap with each other in either dimension. The plots for the hundred dataset indicate that the data points for group 1 are totally contained within the interval which group 2 occupies in both dimensions.
+
+## Zero dataset 10 points
+```{r showZeroDataset-10, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+data(zero)
+mat <- zero[['10.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points")
+```
+
+## Zero dataset 100 points
+```{r showZeroDataset-100, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+data(zero)
+mat <- zero[['100.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points")
+```
+
+## Hundred dataset 10 points
+```{r showHundredDataset-10, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+data(hundred)
+mat <- hundred[['10.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points")
+```
+
+## Hundred dataset 100 points
+```{r showHundredDataset-100, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+data(hundred)
+mat <- hundred[['100.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points")
+```
+
+# Results
+
+We ran ClusterSignificance using points per group from 10 to 100 at an interval of 10 with 10 repititions per number of points per group. This was performed with the [falseNegativeTest][Test Functions] and [falsePositiveTest][Test Functions] functions with their default arguments. The results were plotted with the [sensSpecPlot][Plot Functions] function and indicate that ClusterSignificance's Mlp and Pcp methods both have 100% sensivity and 99% specificity with this dataset.  
+
+```{r FNresults, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+sensSpecPlot()
+```
+
+
+<br></br><br></br><br></br><br></br>
+
+```{r sourceLoad, echo=FALSE}
+insert_fun("zeroOrHundred")
+insert_fun("dynamicXY")
+insert_fun("overlapMatrices")
+insert_fun("makeGroups")
+insert_fun("addOnePoint")
+insert_fun("matrixTests")
+insert_fun("makeMatrix")
+insert_fun("falseNegativeTest")
+insert_fun("sensSpecPlot")
+insert_fun("checkIdenticalDims")
+insert_fun("checkIdenticalMatrix")
+insert_fun("overlapSpecificMatrix")
+insert_fun("interspersion")
+insert_fun("checkIdenticalPoints")
+.regenerate <- ClusterSignificanceTestingSuite:::.regenerate
+insert_fun(".regenerate")
+```
+
+*****
+
+# Functions
+
+## General Functions {.tabset}
+
+### makeMatrix
+```{r help-makeMatrix, echo=FALSE}
+help(makeMatrix)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r makeMatrix-source}
+```
+
+### makeGroups
+```{r help-makeGroups, echo=FALSE}
+help(makeGroups)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r makeGroups-source}
+```
+
+<br></br><br></br>
+
+## Dataset Generation Functions {.tabset}
+
+### zeroOrHundred
+```{r help-zeroOrHundred, echo=FALSE}
+help(zeroOrHundred)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r zeroOrHundred-source}
+```
+
+### dynamicXY
+```{r help-dynamicXY, echo=FALSE}
+help(dynamicXY)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r dynamicXY-source}
+```
+
+### overlapMatrices
+```{r help-overlapMatrices, echo=FALSE}
+help(overlapMatrices)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r overlapMatrices-source}
+```
+
+### addOnePoint
+```{r help-addOnePoint, echo=FALSE}
+help(addOnePoint)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r addOnePoint-source}
+```
+
+
+<br></br><br></br>
+
+## Matrix Test Functions {.tabset}
+
+### matrixTests
+```{r help-matrixTests, echo=FALSE}
+help(matrixTests)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r matrixTests-source}
+```
+
+### checkIdenticalDims
+```{r help-checkIdenticalDims, echo=FALSE}
+help(checkIdenticalDims)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r checkIdenticalDims-source}
+```
+
+### checkIdenticalMatrix
+```{r help-checkIdenticalMatrix, echo=FALSE}
+help(checkIdenticalMatrix)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r checkIdenticalMatrix-source}
+```
+
+### overlapSpecificMatrix
+```{r help-overlapSpecificMatrix, echo=FALSE}
+help(overlapSpecificMatrix)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r overlapSpecificMatrix-source}
+```
+
+### interspersion
+```{r help-interspersion, echo=FALSE}
+help(interspersion)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r interspersion-source}
+```
+
+### checkIdenticalPoints
+```{r help-checkIdenticalPoints, echo=FALSE}
+help(checkIdenticalPoints)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r checkIdenticalPoints-source}
+```
+
+### .regenerate
+
+<p class="rawCode">Raw code</p>
+
+```{r .regenerate-source}
+```
+
+<br></br><br></br>
+
+## Test Functions {.tabset}
+
+### falseNegativeTest
+```{r help-falseNegativeTest, echo=FALSE}
+help(falseNegativeTest)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r falseNegativeTest-source}
+```
+
+<br></br><br></br>
+
+## Plot Functions {.tabset}
+
+### plotFNtest
+```{r help-sensSpecPlot, echo=FALSE}
+help(sensSpecPlot)
+```
+
+<p class="rawCode">Raw code</p>
+
+```{r sensSpecPlot-source}
+```
+
+
+
+<br></br><br></br><br></br><br></br>
+
+*****
+
+# Datasets {.tabset}
+
+## zero
+```{r help-zero, echo=FALSE}
+help(zero)
+```
+
+## hundred
+```{r help-hundred, echo=FALSE}
+help(hundred)
+```
+
+## fnTestResults
+```{r help-fnTestResults, echo=FALSE}
+help(fnTestResults)
+```
+
+
+
+
+
+<br></br><br></br><br></br><br></br>
+
+
+

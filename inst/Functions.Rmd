@@ -1,0 +1,234 @@
+---
+title: "Functions"
+author: "Jason T. Serviss"
+date: "30/11/2016"
+output:
+    html_document:
+        theme: flatly
+        toc: no
+---
+
+<style>
+    .col2 {
+        columns: 2 200px;         /* number of columns and width in pixels*/
+        -webkit-columns: 2 200px; /* chrome, safari */
+        -moz-columns: 2 200px;    /* firefox */
+    }
+</style>
+
+#Introduction
+This document is to highlight the capability of the functions used for testing the ClusterSignificance package.
+
+<br></br>
+
+```{r setup, include=FALSE}
+library(ClusterSignificanceTestingSuite)
+library(printr)
+library(knitr)
+
+##the function below allows dynamic insertion of the function source code 
+insert_fun = function(name) {
+    read_chunk(
+      lines = capture.output(dump(name, '')), 
+      labels = paste(name, 'source', sep = '-')
+    )
+}
+
+```
+
+```{r, echo=FALSE}
+insert_fun("makeMatrix")
+insert_fun("makeGroups")
+insert_fun("overlapProbability")
+.savePointsOverlaps <- ClusterSignificanceTestingSuite:::.savePointsOverlaps
+insert_fun(".savePointsOverlaps")
+.createMatAndGroups <- ClusterSignificanceTestingSuite:::.createMatAndGroups
+insert_fun(".createMatAndGroups")
+insert_fun("dynamicXY")
+insert_fun("calculateOverlap")
+insert_fun("addOnePoint")
+insert_fun("interspersion")
+insert_fun("checkIdenticalDims")
+insert_fun("checkIdenticalMatrix")
+insert_fun("overlapMatrices")
+insert_fun("zeroOrHundred")
+insert_fun("falseNegativeTest")
+insert_fun("falsePositiveTest")
+insert_fun("matrixTests")
+.regenerate <- ClusterSignificanceTestingSuite:::.regenerate
+insert_fun(".regenerate")
+```
+
+#Lower level functions {.tabset}
+##makeMatrix
+```{r}
+help('makeMatrix')
+```
+
+####Source code
+```{r, makeMatrix-source}
+```
+
+##makeGroups
+```{r}
+help('makeGroups')
+```
+
+```{r, makeGroups-source}
+```
+
+##overlapProbability
+```{r}
+help(overlapProbability)
+```
+
+```{r, overlapProbability-source}
+```
+
+### .savepointsOverlaps
+```{r, .savePointsOverlaps-source}
+```
+
+### .createMatAndGroups
+```{r, .createMatAndGroups-source}
+```
+
+##dynamicXY
+```{r}
+help('dynamicXY')
+```
+
+```{r, dynamicXY-source}
+```
+
+##addOnePoint
+```{r}
+help('addOnePoint')
+```
+
+```{r, addOnePoint-source}
+```
+
+#
+<br></br><br></br><br></br>
+
+#Matrix Checks {.tabset}
+##calculateOverlap
+```{r}
+help('calculateOverlap')
+```
+
+```{r, calculateOverlap-source}
+```
+
+##interspersion
+```{r}
+help(interspersion)
+```
+
+```{r, interspersion-source}
+```
+
+An example of **interspersion**:
+<div class="col2">
+```{r, message=FALSE}
+mat <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10, seed=15)
+groups <- makeGroups(mat, names=c("g1", "g2"))
+visualizeOverlaps(mat, groups, plotType="points")
+interspersion(mat, groups, 1)
+
+mat <- makeMatrix(x=c(0,1), y=c(0.9,0.95), dim=2, points=10, seed=15)
+groups <- makeGroups(mat, names=c("g1", "g2"))
+visualizeOverlaps(mat, groups, plotType="points")
+interspersion(mat, groups, 1)
+```
+</div>
+
+We can see that in the first example (left) that group 2 is highly interspersed within group 1 and therefore, the interspersion score is high. On the other hand, in the second example (right) group 2 has a low interspersion within group 1 and, therefore, the interspersion score is low.
+
+##checkIdenticalDims
+```{r}
+help('checkIdenticalDims')
+```
+
+```{r, checkIdenticalDims-source}
+```
+
+An example of **checkIdenticalDims**:
+<div class="col2">
+```{r}
+mat <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10)
+names <- c("grp1", "grp2")
+groups <- makeGroups(mat, names=names)
+checkIdenticalDims(mat, groups)
+
+spl1 <- split(mat[[1]][,1], groups)
+spl2 <- split(mat[[1]][,2], groups)
+mat <- list(matrix(c(spl1[[1]], spl1[[2]], spl1[[1]], spl2[[2]]), ncol=2))
+checkIdenticalDims(mat, groups)
+```
+</div>
+
+##checkIdenticalMatrix
+```{r}
+help('checkIdenticalMatrix')
+```
+
+```{r, checkIdenticalMatrix-source}
+```
+
+##checkIdenticalPoints
+```{r}
+help('checkIdenticalPoints')
+```
+
+```{r, checkIdenticalPoints-source}
+```
+
+##matrixTests
+```{r}
+help('matrixTests')
+```
+
+```{r, matrixTests-source}
+```
+
+### .regenerate
+```{r, .regenerate-source}
+```
+
+#
+<br></br><br></br><br></br>
+
+#Higher level functions {.tabset}
+##overlapMatrices
+```{r}
+help('overlapMatrices')
+```
+
+```{r, overlapMatrices-source}
+```
+
+##zeroOrHundred
+```{r}
+help('zeroOrHundred')
+```
+
+```{r, zeroOrHundred-source}
+```
+
+##falseNegativeTest
+```{r}
+help('falseNegativeTest')
+```
+
+```{r, falseNegativeTest-source}
+```
+
+##falsePositiveTest
+```{r}
+help('falsePositiveTest')
+```
+
+```{r, falsePositiveTest-source}
+```

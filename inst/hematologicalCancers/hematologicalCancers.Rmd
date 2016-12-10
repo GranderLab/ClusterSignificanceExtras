@@ -1,0 +1,741 @@
+---
+title: "ClusterSignificance Hematological Malignancies"
+author: "Jason T. Serviss"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    theme: flatly
+    toc: yes
+    code_folding: hide
+---
+
+lncRNAs have been reported to play an important role in cellular biological processes such as gene regulation and have also been reported to be highly cell type specific. Previously, lncRNAs have beeen shown to be differentially expressed in pediatric acute lymphoblastic leukemia with MLL t(11q23) translocations and specific expression of these lncRNAs was demonstrated to be important in regulation of the disease phenotype. Due to these reasons, we hypothesized that lncRNA expression may also be capable of distinguishing known hematopoetic malagnancies and is therefore, potentially, important for refulating specific gene expression driving these diseases.
+
+To test this hypothesis, we utilized the ClusterSignificance package to test for specific hematological malagnancy group seperations after running the tSNE algorithm using only lncRNA expression profiles as input. Specifically we utilized the GSE13159 dataset comprised of microarray gene expression data from 6 well characterised hematological malagnancies. We extracted 5165 probes detecting lncRNA from the expression data representing 4283 individual genes. Multidimensional reduction was then performed using the tSNE algorithm by inputing only the expression values of the lncRNAs. The ClusterSignificance Pcp method was then utilized to determine significant seperations within the known hematological malagnancies.
+
+The results indicate that, of the 21 group comparisons made 18 of those were found to exhibit a significant seperation with 10000 iterations of permutation. These results indicate that lncRNA expression profiles are, in many cases, able to differentiate many common hematological malagnancies and, thus, may be important for disease progression and identity.
+
+## Download data and extract lncRNAs
+```{r, message=FALSE, warning=FALSE}
+library(GEOquery)
+```
+
+```{r, echo=FALSE}
+load('/Users/jasonserviss/GitHub/ClusterSignificanceTestingSuite/inst/hematologicalMalag/GSE13159.rda')
+```
+
+```{r, eval=FALSE}
+#download data
+gset <- getGEO("GSE13159", GSEMatrix =TRUE)[[1]]
+save(gset, file='/Users/jasonserviss/GitHub/ClusterSignificanceTestingSuite/inst/hematologicalMalag/GSE13159.rda', compress="bzip2")
+```
+
+```{r, message=FALSE, warning=FALSE}
+#extract expression values, remove incomplete cases, and get phenotype data
+fvarLabels(gset) <- make.names(fvarLabels(gset))
+ex <- as.data.frame(exprs(gset))
+exp <- ex[complete.cases(ex),]
+pheno <- pData(phenoData(gset))
+
+#annotate probe ids with ensembl IDs and biotypes
+ensembl = biomaRt::useMart(
+    biomart = "ENSEMBL_MART_ENSEMBL",
+    dataset="hsapiens_gene_ensembl", 
+    host = "jul2015.archive.ensembl.org"
+)
+
+affyids = rownames(exp)
+IDs <- biomaRt::getBM(
+    attributes=c(
+        'affy_hg_u133_plus_2', 
+        'ensembl_gene_id', 
+        'external_gene_name', 
+        'chromosome_name',
+        'start_position',
+        'end_position', 
+        'gene_biotype'
+    ), 
+    filters = 'affy_hg_u133_plus_2', 
+    values = affyids, 
+    mart = ensembl
+)
+
+colnames(IDs) = c(
+    "probe_id", 
+    "ensembl_gene_id", 
+    "external_gene_name", 
+    "chromosome_name", 
+    "start_position", 
+    "end_position", 
+    "gene_biotype"
+)
+
+#remove probes that are duplicated if any
+IDs = subset(
+    IDs, 
+    duplicated(IDs$probe_id) == FALSE & 
+    duplicated(IDs$probe_id, fromLast=TRUE) == FALSE
+) 
+
+#merge annotation with expression data and extract lncRNA biotypes
+exp <- merge(exp, IDs, by.x=0, by.y="probe_id")
+ncGenes <- c(
+    "3prime_overlapping_ncrna", 
+    "antisense", 
+    "IG_V_pseudogene", 
+    "lincRNA", 
+    "misc_RNA", 
+    "polymorphic_pseudogene", 
+    "processed_pseudogene", 
+    "processed_transcript", 
+    "pseudogene", 
+    "sense_intronic", 
+    "sense_overlapping", 
+    "TR_V_pseudogene", 
+    "transcribed_processed_pseudogene", 
+    "transcribed_unitary_pseudogene", 
+    "transcribed_unprocessed_pseudogene", 
+    "unitary_pseudogene", 
+    "unprocessed_pseudogene"
+)
+
+nc <- exp[exp$gene_biotype %in% ncGenes, ]
+rownames(nc) <- nc$Row.names
+nc$Row.names <- NULL
+
+```
+
+```{r}
+#change names of genetic subtypes to something more readable
+pheno$characteristics_ch1.1 <- gsub(
+    "leukemia class: (.*)", 
+    "\\1", 
+    pheno$characteristics_ch1.1
+)
+
+Ball <- c("ALL with hyperdiploid karyotype", "ALL with t(1;19)", "ALL with t(12;21)", "c-ALL/Pre-B-ALL with t(9;22)", "c-ALL/Pre-B-ALL without t(9;22)", "mature B-ALL with t(8;14)", "Pro-B-ALL with t(11q23)/MLL")
+aml <- c("AML complex aberrant karyotype", "AML with inv(16)/t(16;16)", "AML with normal karyotype + other abnormalities", "AML with t(11q23)/MLL", "AML with t(15;17)", "AML with t(8;21)")
+
+
+pheno$characteristics_ch1.1 <- ifelse(
+    pheno$characteristics_ch1.1 %in% Ball, 
+    "B-ALL", 
+    ifelse(
+        pheno$characteristics_ch1.1 %in% aml, 
+        "AML", 
+        ifelse(
+            pheno$characteristics_ch1.1 == "T-ALL", 
+            "T-ALL", 
+            ifelse(
+                pheno$characteristics_ch1.1 == "Non-leukemia and healthy bone marrow", 
+                "Non-leukemia and healthy bone marrow", 
+                ifelse(
+                    pheno$characteristics_ch1.1 == "CML", 
+                    "CML", 
+                    ifelse(
+                        pheno$characteristics_ch1.1 == "CLL", 
+                        "CLL", 
+                        "MDS"
+                    )
+                )
+            )
+        )
+    )
+)
+
+pheno$characteristics_ch1.1 <- ifelse(pheno$characteristics_ch1.1 == "Non-leukemia and healthy bone marrow", "normal", pheno$characteristics_ch1.1)
+```
+
+##Dataset stats
+####Number of unique long non-coding genes
+```{r}
+library(printr)
+#number of unique genes
+length(unique(nc$ensembl_gene_id))
+```
+
+####Number of samples in each genetic subtype
+```{r}
+#number of samples in each subtype
+table(pheno$characteristics_ch1.1)
+```
+
+## Run tSNE and plot {.tabset}
+```{r, eval=FALSE}
+#run tsne using lncRNA biotypes only
+library(Rtsne)
+tsne <- Rtsne(t(
+    nc[ ,!colnames(nc) %in% c(
+        "Row.names", 
+        "probe_id", 
+        "ensembl_gene_id", 
+        "external_gene_name", 
+        "chromosome_name", 
+        "start_position", 
+        "end_position", 
+        "gene_biotype"
+    )]
+), dims=3)
+
+#put tSNE results and phenotype data in a data.frame
+plot <- data.frame(tsne$Y, pheno)
+```
+
+```{r, echo=FALSE}
+load('/Users/jasonserviss/GitHub/ClusterSignificanceTestingSuite/inst/hematologicalMalag/wrappedData.rda')
+```
+
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+#run ClusterSignificance projection so colors match in tSNE plots and ClusterSignificance plots
+library(ClusterSignificance)
+mat <- as.matrix(plot[ ,c("X1", "X2", "X3")])
+groups <- plot$characteristics_ch1.1
+prj <- pcp(mat, groups)
+group.color <- getData(prj, "group.color")
+```
+
+### Dim X
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+#plot tSNE results
+library(scatterplot3d)
+p <- scatterplot3d(
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X1"], 
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X2"], 
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X3"], 
+    color=rgb(
+            group.color["red",   colnames(group.color)[1]],
+            group.color["green", colnames(group.color)[1]],
+            group.color["blue",  colnames(group.color)[1]],
+            150,
+            maxColorValue=255
+    ),
+    pch=16,
+    box=FALSE,
+    xlab="X",
+    ylab="Y",
+    zlab="Z",
+    xlim=c(min(plot$X1), max(plot$X1)),
+    ylim=c(min(plot$X2), max(plot$X2)),
+    zlim=c(min(plot$X3), max(plot$X3))
+
+)
+
+invisible(
+    sapply(2:length(unique(groups)), function(x)
+        p$points3d(
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X1"],
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X2"],
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X3"],
+            col=rgb(
+                group.color["red",   colnames(group.color)[x]],
+                group.color["green", colnames(group.color)[x]],
+                group.color["blue",  colnames(group.color)[x]],
+                150,
+                maxColorValue=255
+            ),
+            pch=16,
+            cex = 1
+        )
+    )
+)
+```
+
+### Dim Y
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+
+p <- scatterplot3d(
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X2"], 
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X1"], 
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X3"], 
+    color=rgb(
+            group.color["red",   colnames(group.color)[1]],
+            group.color["green", colnames(group.color)[1]],
+            group.color["blue",  colnames(group.color)[1]],
+            150,
+            maxColorValue=255
+    ),
+    pch=16,
+    box=FALSE,
+    xlab="Y",
+    ylab="X",
+    zlab="Z",
+    xlim=c(min(plot$X2), max(plot$X2)),
+    ylim=c(min(plot$X1), max(plot$X1)),
+    zlim=c(min(plot$X3), max(plot$X3))
+
+)
+
+invisible(
+    sapply(2:length(unique(groups)), function(x)
+        p$points3d(
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X2"],
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X1"],
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X3"],
+            col=rgb(
+                group.color["red",   colnames(group.color)[x]],
+                group.color["green", colnames(group.color)[x]],
+                group.color["blue",  colnames(group.color)[x]],
+                150,
+                maxColorValue=255
+            ),
+            pch=16,
+            cex = 1
+        )
+    )
+)
+```
+
+### Dim Z
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+p <- scatterplot3d(
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X3"], 
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X2"], 
+    plot[plot$characteristics_ch1.1 == colnames(group.color)[1], "X1"], 
+    color=rgb(
+            group.color["red",   colnames(group.color)[1]],
+            group.color["green", colnames(group.color)[1]],
+            group.color["blue",  colnames(group.color)[1]],
+            150,
+            maxColorValue=255
+    ),
+    pch=16,
+    box=FALSE,
+    xlab="Z",
+    ylab="Y",
+    zlab="X",
+    xlim=c(min(plot$X3), max(plot$X3)),
+    ylim=c(min(plot$X2), max(plot$X2)),
+    zlim=c(min(plot$X1), max(plot$X1))
+
+)
+
+invisible(
+    sapply(2:length(unique(groups)), function(x)
+        p$points3d(
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X3"],
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X2"],
+            plot[plot$characteristics_ch1.1 == colnames(group.color)[x], "X1"],
+            col=rgb(
+                group.color["red",   colnames(group.color)[x]],
+                group.color["green", colnames(group.color)[x]],
+                group.color["blue",  colnames(group.color)[x]],
+                150,
+                maxColorValue=255
+            ),
+            pch=16,
+            cex = 1
+        )
+    )
+)
+```
+
+## ClusterSignificance Projection {.tabset}
+### all steps
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj)
+```
+
+### step 1
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=1)
+```
+
+### step 2
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=2)
+```
+
+### step 3
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=3)
+```
+
+### step 4
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=4)
+```
+
+### step 5
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=5)
+```
+
+### step 6
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=6)
+```
+
+
+##ClusterSignificance Classification {.tabset}
+```{r}
+cl <- classify(prj)
+```
+
+### AML vs B-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[1])
+```
+
+### AML vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[2])
+```
+
+### AML vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[3])
+```
+
+### AML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[4])
+```
+
+### AML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[5])
+```
+
+### AML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[6])
+```
+
+### B-ALL vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[7])
+```
+
+### B-ALL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[8])
+```
+
+### B-ALL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[9])
+```
+
+### B-ALL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[10])
+```
+
+### B-ALL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[11])
+```
+
+### CLL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[12])
+```
+
+### CLL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[13])
+```
+
+### CLL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[14])
+```
+
+### CLL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[15])
+```
+
+### CML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[16])
+```
+
+### CML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[17])
+```
+
+### CML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[18])
+```
+
+### MDS vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[19])
+```
+
+### MDS vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[20])
+```
+
+### Normal vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[21])
+```
+
+
+##ClusterSignificance Permutation {.tabset}
+```{r, message=FALSE, eval=FALSE}
+pe <- permute(mat, groups, iter=10000, projmethod="pcp")
+```
+
+```{r, echo=FALSE}
+#load permutation results
+load('~/Github/ClusterSignificanceTestingSuite/inst/hematologicalMalag/run/hemaMalaTestResults.rda')
+```
+
+### p-Value table
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+library(printr)
+pValues <- as.data.frame(pvalue(pe))
+colnames(pValues) <- "pValue"
+```
+
+```{r}
+pValues
+```
+
+### AML vs B-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[1])
+```
+
+### AML vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[2])
+```
+
+### AML vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[3])
+```
+
+### AML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[4])
+```
+
+### AML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[5])
+```
+
+### AML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[6])
+```
+
+### B-ALL vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[7])
+```
+
+### B-ALL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[8])
+```
+
+### B-ALL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[9])
+```
+
+### B-ALL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[10])
+```
+
+### B-ALL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[11])
+```
+
+### CLL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[12])
+```
+
+### CLL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[13])
+```
+
+### CLL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[14])
+```
+
+### CLL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[15])
+```
+
+### CML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[16])
+```
+
+### CML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[17])
+```
+
+### CML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[18])
+```
+
+### MDS vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[19])
+```
+
+### MDS vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[20])
+```
+
+### Normal vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[21])
+```
+
+##Investigate the lack of a significant seperation between the MDS and normal groups {.tabset}
+###view 1
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+inv <- subset(plot, characteristics_ch1.1 == "normal" | characteristics_ch1.1 == "MDS")
+
+p <- scatterplot3d(
+    inv[inv$characteristics_ch1.1 == "normal", "X1"], 
+    inv[inv$characteristics_ch1.1 == "normal", "X2"], 
+    inv[inv$characteristics_ch1.1 == "normal", "X3"], 
+    color=rgb(
+            group.color["red",   "normal"],
+            group.color["green", "normal"],
+            group.color["blue",  "normal"],
+            150,
+            maxColorValue=255
+    ),
+    pch=16,
+    box=FALSE,
+    xlab="X",
+    ylab="Y",
+    zlab="Z",
+    xlim=c(min(inv$X1), max(inv$X1)),
+    ylim=c(min(inv$X2), max(inv$X2)),
+    zlim=c(min(inv$X3), max(inv$X3))
+
+)
+
+invisible(
+    sapply(2:length(unique(groups)), function(x)
+        p$points3d(
+            inv[inv$characteristics_ch1.1 == "MDS", "X1"],
+            inv[inv$characteristics_ch1.1 == "MDS", "X2"],
+            inv[inv$characteristics_ch1.1 == "MDS", "X3"],
+            col=rgb(
+                group.color["red",   "MDS"],
+                group.color["green", "MDS"],
+                group.color["blue",  "MDS"],
+                150,
+                maxColorValue=255
+            ),
+            pch=16,
+            cex = 1
+        )
+    )
+)
+```
+
+###view 2
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+
+p <- scatterplot3d(
+    inv[inv$characteristics_ch1.1 == "normal", "X2"], 
+    inv[inv$characteristics_ch1.1 == "normal", "X1"], 
+    inv[inv$characteristics_ch1.1 == "normal", "X3"], 
+    color=rgb(
+            group.color["red",   "normal"],
+            group.color["green", "normal"],
+            group.color["blue",  "normal"],
+            150,
+            maxColorValue=255
+    ),
+    pch=16,
+    box=FALSE,
+    xlab="X",
+    ylab="Y",
+    zlab="Z",
+    xlim=c(min(inv$X2), max(inv$X2)),
+    ylim=c(min(inv$X1), max(inv$X1)),
+    zlim=c(min(inv$X3), max(inv$X3))
+
+)
+
+invisible(
+    sapply(2:length(unique(groups)), function(x)
+        p$points3d(
+            inv[inv$characteristics_ch1.1 == "MDS", "X2"],
+            inv[inv$characteristics_ch1.1 == "MDS", "X1"],
+            inv[inv$characteristics_ch1.1 == "MDS", "X3"],
+            col=rgb(
+                group.color["red",   "MDS"],
+                group.color["green", "MDS"],
+                group.color["blue",  "MDS"],
+                150,
+                maxColorValue=255
+            ),
+            pch=16,
+            cex = 1
+        )
+    )
+)
+```
+
+###view 3
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+
+p <- scatterplot3d(
+    inv[inv$characteristics_ch1.1 == "normal", "X3"], 
+    inv[inv$characteristics_ch1.1 == "normal", "X2"], 
+    inv[inv$characteristics_ch1.1 == "normal", "X1"], 
+    color=rgb(
+            group.color["red",   "normal"],
+            group.color["green", "normal"],
+            group.color["blue",  "normal"],
+            150,
+            maxColorValue=255
+    ),
+    pch=16,
+    box=FALSE,
+    xlab="X",
+    ylab="Y",
+    zlab="Z",
+    xlim=c(min(inv$X3), max(inv$X3)),
+    ylim=c(min(inv$X2), max(inv$X2)),
+    zlim=c(min(inv$X1), max(inv$X1))
+
+)
+
+invisible(
+    sapply(2:length(unique(groups)), function(x)
+        p$points3d(
+            inv[inv$characteristics_ch1.1 == "MDS", "X3"],
+            inv[inv$characteristics_ch1.1 == "MDS", "X2"],
+            inv[inv$characteristics_ch1.1 == "MDS", "X1"],
+            col=rgb(
+                group.color["red",   "MDS"],
+                group.color["green", "MDS"],
+                group.color["blue",  "MDS"],
+                150,
+                maxColorValue=255
+            ),
+            pch=16,
+            cex = 1
+        )
+    )
+)
+```

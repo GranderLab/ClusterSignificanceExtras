@@ -1,0 +1,25 @@
+Package: ClusterSignificanceTestingSuite
+Title: What the Package Does (one line, title case)
+Version: 0.0.0.9000
+Author: Jason T. Serviss
+Maintainer: Jason T Serviss <jason.serviss@ki.se>
+Description: Testing results and tools for testing the ClusterSignificance package.
+Depends:
+    R (>= 3.2.2),
+    ClusterSignificance
+Imports:
+    reshape2,
+    foreach,
+    devtools,
+    stats,
+    plyr,
+    doMC,
+    gpclib,
+    phonTools,
+    ggthemes,
+    ggplot2
+Suggests:
+    testthat
+License: GPL-3
+LazyData: true
+RoxygenNote: 5.0.1.9000
