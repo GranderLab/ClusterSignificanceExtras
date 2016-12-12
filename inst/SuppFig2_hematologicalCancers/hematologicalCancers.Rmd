@@ -1,0 +1,396 @@
+---
+title: "ClusterSignificance Hematological Malignancies"
+author: "Jason T. Serviss"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    theme: flatly
+    toc: yes
+    code_folding: hide
+---
+
+###Read Me
+For those not desiring to re-run the whole analysis from scratch, but wanting to explore and re-create the published analysis, the minimal necessary data has been included in the ClusterSignificanceTesting package to achieve this. This included data is utilized when knitting this document.
+
+If you desire to re-run the whole code from scratch to re-create the analysis, we warn you that it can take some time. Depending on your system, the _hematologicalCancers_ function may take hours to days to run. Due to this fact, the chunk containing that function is set to eval=FALSE. We recommend running the _hematologicalCancers_ function as demonstrated in this document, save the output to your local system, and execute the downstream commands after the output from the _hematologicalCancers_ function is loaded into R. Please note, due to the nature of t-SNE, results for the clustering may not look the same if t-SNE is re-run.
+
+##Introduction
+lncRNAs have been reported to play an important role in cellular biological processes such as gene regulation and have also been reported to be highly cell type specific. Previously, lncRNAs have beeen shown to be differentially expressed in pediatric acute lymphoblastic leukemia with MLL t(11q23) translocations and specific expression of these lncRNAs was demonstrated to be important in regulation of the disease phenotype. Due to these reasons, we hypothesized that lncRNA expression may also be capable of distinguishing known hematopoetic malagnancies and is therefore, potentially, important for regulating specific gene expression driving these diseases.
+
+To test this hypothesis, we utilized the ClusterSignificance package to test for specific hematological malagnancy group seperations after running the tSNE algorithm using only lncRNA expression profiles as input. Specifically we utilized the GSE13159 dataset comprised of microarray gene expression data from 6 well characterised hematological malagnancies. We extracted 5165 probes detecting lncRNA from the expression data representing 4283 individual genes. Multidimensional reduction was then performed using the tSNE algorithm by inputing only the expression values of the lncRNAs. The ClusterSignificance Pcp method was then utilized to determine significant seperations within the known hematological malagnancies.
+
+The results indicate that, of the 21 group comparisons made 20 of those were found to exhibit a significant seperation with 10000 iterations of permutation. The 'normal vs MDS' comparison seems to not show a significant seperation due to the inability of t-SNE to significantly seperate these two groups, most likely, due to their relative similarity. These results indicate that lncRNA expression profiles are able to differentiate many common hematological malagnancies and, thus, may be important for disease progression and identity.
+
+```{r style, echo = FALSE, results = 'asis', warning=FALSE, message=FALSE}
+BiocStyle::markdown()
+library(knitr)
+library(ClusterSignificanceTesting)
+##the function below allows dynamic insertion of the function source code 
+insert_fun = function(name) {
+    read_chunk(
+      lines = capture.output(dump(name, '')), 
+      labels = paste(name, 'source', sep = '-')
+    )
+}
+```
+
+```{r, eval=TRUE}
+library(scatterplot3d)
+library(printr)
+library(grid)
+library(gridBase)
+library(gridExtra)
+```
+
+```{r, eval=FALSE}
+data <- hematologicalCancers()
+hemCancData <- data[[1]]
+group.color <- data[[2]]
+prj <- data[[3]]
+cl <- data[[4]]
+pe <- data[[5]]
+pValues <- data[[6]]
+mat <- data[[7]]
+groups <- data[[8]]
+nc <- data[[9]]
+lncGenes <- data[[10]]
+```
+
+##Dataset stats
+####Number of unique long non-coding genes
+```{r, eval=TRUE}
+#number of unique genes
+length(unique(lncGenes))
+```
+
+####Number of samples in each genetic subtype
+```{r, eval=TRUE}
+#number of samples in each subtype
+table(hemCancData$characteristics_ch1.1)
+```
+
+##t-SNE plots {.tabset}
+Below we utilize the [tsnePlots](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/hematologicalCancers.R#L238-L380) function to plot the tsne results from several different perspectives.
+
+###dim X
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+tsnePlots(hemCancData, "X")
+```
+
+###dim Y
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+tsnePlots(hemCancData, "Y")
+```
+
+###dim Z
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+tsnePlots(hemCancData, "Z")
+```
+
+## ClusterSignificance Projection {.tabset}
+### all steps
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+mat <- as.matrix(hemCancData[ ,c("X1", "X2", "X3")])
+groups <- hemCancData$characteristics_ch1.1
+prj <- pcp(mat, groups)
+plot(prj)
+```
+
+### step 1
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=1)
+```
+
+### step 2
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=2)
+```
+
+### step 3
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=3)
+```
+
+### step 4
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=4)
+```
+
+### step 5
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=5)
+```
+
+### step 6
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(prj, steps=6)
+```
+
+
+##ClusterSignificance Classification {.tabset}
+```{r}
+cl <- classify(prj)
+```
+
+### AML vs B-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[1])
+```
+
+### AML vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[2])
+```
+
+### AML vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[3])
+```
+
+### AML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[4])
+```
+
+### AML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[5])
+```
+
+### AML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[6])
+```
+
+### B-ALL vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[7])
+```
+
+### B-ALL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[8])
+```
+
+### B-ALL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[9])
+```
+
+### B-ALL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[10])
+```
+
+### B-ALL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[11])
+```
+
+### CLL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[12])
+```
+
+### CLL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[13])
+```
+
+### CLL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[14])
+```
+
+### CLL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[15])
+```
+
+### CML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[16])
+```
+
+### CML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[17])
+```
+
+### CML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[18])
+```
+
+### MDS vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[19])
+```
+
+### MDS vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[20])
+```
+
+### Normal vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(cl, comparison=names(getData(cl, "scores"))[21])
+```
+
+
+##ClusterSignificance Permutation {.tabset}
+### p-Value table
+```{r, eval=TRUE}
+pValues <- as.data.frame(pvalue(pe))
+colnames(pValues) <- "pValue"
+```
+
+```{r}
+pValues
+```
+
+### AML vs B-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[1])
+```
+
+### AML vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[2])
+```
+
+### AML vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[3])
+```
+
+### AML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[4])
+```
+
+### AML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[5])
+```
+
+### AML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[6])
+```
+
+### B-ALL vs CLL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[7])
+```
+
+### B-ALL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[8])
+```
+
+### B-ALL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[9])
+```
+
+### B-ALL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[10])
+```
+
+### B-ALL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[11])
+```
+
+### CLL vs CML
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[12])
+```
+
+### CLL vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[13])
+```
+
+### CLL vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[14])
+```
+
+### CLL vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[15])
+```
+
+### CML vs MDS
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[16])
+```
+
+### CML vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[17])
+```
+
+### CML vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[18])
+```
+
+### MDS vs Normal
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[19])
+```
+
+### MDS vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[20])
+```
+
+### Normal vs T-ALL
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+plot(pe, comparison=names(getData(pe, "scores.vec"))[21])
+```
+
+##Investigate the lack of a significant seperation between the MDS and normal groups {.tabset}
+Here we subset the normal and MDS patient samples from the tSNE reults and plot only those samples using the [normalMDS](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/hematologicalCancers.R#L398-L540) function, allowing us to easily view only those samples. The results indicate that after tSNE the normal and MDS represent a reasonably homogenous cluster and therefore, it may be expected that ClusterSignificance would not detect a significant seperation of these groups.
+
+###view 1
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+normalMDS(hemCancData, 1)
+```
+
+###view 2
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+normalMDS(hemCancData, 2)
+```
+
+###view 3
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+normalMDS(hemCancData, 3)
+```
+
+## Re-create Supplementary Fig. 2 from publication
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+#format pvalues for easier plotting
+pValues <- as.data.frame(round(pvalue(pe), digits=6))
+colnames(pValues) <- "pValues"
+pValues$pValues <- ifelse(pValues$pValues == 0.0001, paste("<", 0.0001, sep=""), pValues$pValues)
+
+#adjut layout for 2 plots
+layout(matrix(c(1,2), nrow=1), widths=c(7,3))
+
+#plot
+plot(prj, steps=2, alpha=0.75, cex.lab = 1.5, cex.axis = 1)
+
+#table
+frame()
+vps <- baseViewports()
+pushViewport(vps$inner, vps$figure, vps$plot)
+grob <-  tableGrob(pValues)
+grid.draw(grob)
+popViewport(3)
+```
+

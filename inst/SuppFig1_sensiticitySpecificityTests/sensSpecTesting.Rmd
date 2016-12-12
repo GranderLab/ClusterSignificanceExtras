@@ -1,0 +1,173 @@
+---
+title: "Sensivity and Specificity Testing"
+author: "Jason T. Serviss"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    theme: flatly
+    toc: yes
+    code_folding: hide
+vignette: >
+  %\VignetteIndexEntry{ClusterSignificance Vignette} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\usepackage[utf8]{inputenc}
+  %\SweaveUTF8
+---
+
+# Read Me
+For those not desiring to re-run the whole analysis from scratch, but wanting to explore and re-create the published analysis, the minimal necessary data has been included in the ClusterSignificanceTesting package to achieve this. This included data is utilized when knitting this document.
+
+If you desire to re-run the whole code from scratch to re-create the analysis, we warn you that it can take some time. Depending on your system, the _zeroOrHundred_, _specificityTest_ and _sensitivityTest_ functions may take hours to days to run. Due to this fact, the chunks containing those function are set to eval=FALSE. We recommend running the above mentioned functions as demonstrated in this document in a seperate R session, save the output to your local system, and execute the downstream commands after the output from the functions is loaded into R.
+
+#Introduction
+Testing of the specificity and sensitivity of the ClusterSignificance package took place using two datasets representing two different known outcomes. The first dataset, called _zero_, was designed to test the sensitivity of ClusterSignificance and therefore included only groups with a true separation. It was produced with the [zeroOrHundred](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L490-L622) function with the overlap argument set to 0. In summary, random numbers for each group and each of the two dimensions were drawn randomly from the uniform distribution. The ranges for the drawn data points were set to have 0% overlap in both dimensions, i.e. none of the data points from group A overlapped with the range of group B. 
+
+To test the specificity of the package a similar design was used with the exception of the group ranges instead being 100% overlapping, i.e. overlap argument to the [zeroOrHundred](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L490-L622) was set to 100. In addition, the criterion that the range of one group be completely contained within the other groups range was implemented. This dataset is commonly refered to as _hundred_ within the document/code.
+
+Finally, the sensitivity and specificity testing datasets were generated for points amounts per group spanning from 5 to 100 with 10 repetitions per points amount. The permute step from ClusterSignificance was run using 10<sup>4</sup> iterations for each input matrix within the datasets and the p-value was recorded. 
+
+#Details
+It should be mentioned that multiple constraints were placed on these datasets as they were generated. Constraints were specified in the [zeroOrHundred](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L490-L622) function dependent on which overlap was desired. [zeroOrHundred](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L490-L622) calls the [matrixTests](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L909-L1029) function which calls additional functions to run each specified check. If all sepcified checks were not passed the [matrixTests](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L909-L1029) re-generates the matrix until it conforms to all checks. Checks run for each dataset are included below:
+
+zero/sensitivity dataset:  
+1. *Overlap*: The group overlap, as calculated using the [calculateOverlap](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L1084-L1168) function, should correspond to the desired overlap. In principal this means that, as each matrix was drawn in a random fashion from the uniform distribution, this function checked that the actual overlap corresponded to the desired overlap.  
+2. *Identical dimensions*: Here we exclude generated matrices where the any single dimension for any group is identical to a dimension for another or the same group. This is desired due to the fact that such data would be highly unlikely to arise in reality. This is checked using the [checkIdenticalDims](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L1299-L1337) function.  
+3. *Unique replicates*: Since we are running 10 replicates per points amount, we desire each replicate to be unique. Therefore, as replicates are generated they are temporarily saved, as each additional replicate is generated it is compared to the already existing matrices for that points amount. If an identical matrix has already been generated then it fails the [checkIdenticalMatrix](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L1368-L1390) test.  
+4. *Non-repeating points*: The [checkIdenticalPoints](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L1420-L1451) function checks that the data points within a matrix are not identical, i.e. it is not desired that a matrix is only 1's or 2's etc. The identicalPointsThreshold argument for this function is set to 1, i.e. all points must be unique, for the zero and hundred datasets.  
+
+hundred/specificity dataset:  
+1. All checks listed above that are run for the zero dataset.  
+2. *Interspersion*: This basically means that we want a reasonably even distribution of the points within the groups range. See the Functions.Rmd file for an example. Interspersion is checked using the [interspersion](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/matrixTools.R#L1200-L1267) command and the interspersion cut-off was set to 50. 
+
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+library(printr)
+library(knitr)
+
+##the function below allows dynamic insertion of the function source code 
+insert_fun = function(name) {
+    read_chunk(
+      lines = capture.output(dump(name, '')), 
+      labels = paste(name, 'source', sep = '-')
+    )
+}
+```
+
+<br></br><br></br>
+
+```{r library, message=FALSE}
+library(ClusterSignificanceTesting)
+```
+
+
+# Dataset generation
+```{r, eval=FALSE}
+#generate the zero dataset, i.e. range overlap = 0
+zero <- zeroOrHundred(overlap=0, save=FALSE, verbose=FALSE)
+
+#generate the hundred dataset, i.e. range overlap = 100
+hundred <- zeroOrHundred(overlap=100, save=FALSE, verbose=FALSE)
+```
+
+# Run tests
+```{r, eval=FALSE}
+#set cores equal to the number of cores to use. Note this will not work across nodes.
+specificityTestResults <- specificityTest(cores=1, save=FALSE)
+sensitivityTestResults <- sensitivityTest(cores=1, save=FALSE)
+```
+
+# Dataset Examples {.tabset}
+The plots below show example matrices from the zero and hundred datasets for points per group equal to 10 and 100. The plot for the zero dataset indicates, as expected, that group 1 and group 2 have zero spatial overlap with each other in either dimension. The plots for the hundred dataset indicate that the data points for group 1 are totally contained within the range which group 2 occupies in both dimensions.
+
+## Zero dataset 10 points
+```{r showZeroDataset-10, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+mat <- zero[['10.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points", cex=3)
+```
+
+## Zero dataset 100 points
+```{r showZeroDataset-100, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+mat <- zero[['100.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points", cex=3)
+```
+
+## Hundred dataset 10 points
+```{r showHundredDataset-10, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+mat <- hundred[['10.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points", cex=3)
+```
+
+## Hundred dataset 100 points
+```{r showHundredDataset-100, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+mat <- hundred[['100.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+visualizeOverlaps(list(mat), groups, plotType="points", cex=3)
+```
+
+# Results
+We ran ClusterSignificance using points per group from 5 to 100 at an interval of 10 with 10 repititions per number of points per group. This was performed with the [sensivitity](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/sensitivitySpecificityTests.R#L31-L104) and [specificity](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/sensitivitySpecificityTests.R#L137-L209) functions with their default arguments. The results were plotted with the [sensSpecPlot](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/sensitivitySpecificityTests.R#L235-L299) function and indicate that ClusterSignificance's Mlp and Pcp methods both have 100% sensivity and specificity with this dataset.  
+
+```{r FNresults, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+sensSpecPlot(sens = sensitivityTestResults, spec = specificityTestResults)
+```
+
+<br></br><br></br><br></br>
+
+# Re-create Supplementary fig. 1
+```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+    library(grid)
+    
+    # Make a list from the ... arguments and plotlist
+    plots <- c(list(...), plotlist)
+    
+    numPlots = length(plots)
+    
+    # If layout is NULL, then use 'cols' to determine layout
+    if (is.null(layout)) {
+        # Make the panel
+        # ncol: Number of columns of plots
+        # nrow: Number of rows needed, calculated from # of cols
+        layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+        ncol = cols, nrow = ceiling(numPlots/cols))
+    }
+    
+    if (numPlots==1) {
+        print(plots[[1]])
+        
+    } else {
+        # Set up the page
+        grid.newpage()
+        pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+        
+        # Make each plot, in the correct location
+        for (i in 1:numPlots) {
+            # Get the i,j matrix positions of the regions that contain this subplot
+            matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+            
+            print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+            layout.pos.col = matchidx$col))
+        }
+    }
+}
+
+mat <- zero[['20.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+x <- visualizeOverlaps(list(mat), groups, plotType="points", cex=2, title = "Sensitivity test example data", subtitle="0% overlapping", alpha=0.75)
+
+mat <- hundred[['20.points']][,,'1.repitition']
+groups <- makeGroups(list(mat), c("grp1", "grp2"))
+y <- visualizeOverlaps(list(mat), groups, plotType="points", cex=2, title = "Specificity test example data", subtitle="100% overlapping", alpha=0.75)
+
+p <- sensSpecPlot()
+
+plots <- list(x, y, p)
+layout <- matrix(c(1,2,3,3), ncol=2, byrow=TRUE)
+multiplot(plotlist = plots, layout = layout)
+```
+
+<br></br><br></br><br></br><br></br>
