@@ -8,13 +8,14 @@ This function generates a table that contains the probability of generating a sp
 when starting with a specific x value.
 }
 \details{
-The function works by examining probability of every x value from 0-1 by 0.001 to generate a matrix with a specific group
-overlap. x, in this case, is x[1] supplied to \code{\link{makeMatrix}} and x[2] = x[1] + 1. A matrix is generated 1000 times for each x
+The function works by examining probability of every x value from 0-100 by 0.9 to generate a matrix with a specific group
+overlap. x, in this case, is x[1] supplied to \code{\link{makeMatrix}} and x[2] = x[1] + 100. A matrix is generated \code{reps} times for each x
 using the \code{\link{makeMatrix}} function. The overlap between groups is then calculated. When this process completes, a lookup table is
 generated. Each x is listed in the lookup table together with the overlap generated in dimension 1 and 2. It was found that
 the same overlap is observed in each dimension and that the probability for each overlap is 100 percent (i.e. same overlap observed
-in all 1000 trials). The lookup table is output as a data frame, primiarly, for use by the \code{\link{overlapMatrices}} function.
+in all trials). The lookup table is output as a data frame, primiarly, for use by the \code{\link{overlapMatrices}} function.
 Note that the 100 percent overlap for both dims is missing from the table and is currently handled by the \code{\link{dymanicXY}} function.
+As well, the lookup table does include the 0 percent overlap but this is overridden by the \code{\link{dynamicXY}} function.
 }
 \examples{
 overlapProbability(save=FALSE, reps=2)

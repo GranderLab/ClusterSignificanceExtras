@@ -78,137 +78,6 @@ makeMatrix <- function(
     return(output)
 }
 
-#' Make Normal Matrix
-#'
-#' This function is specifically designed for the generation of 2 groups of points within a matrix where each dimension for each group is normally distributed.
-#'
-#' Makes a matrix with containing data for two groups of points.
-#' Specifying a specific number of points, dimensions, and mean
-#' and standard deviation for all groups and dimensions is suported.
-#' The resulting matrix will have group 1 occupying the top half of
-#' the matrix and group 2 the bottom half.
-#'
-#'
-#' @name makeMatrixNorm
-#' @rdname makeMatrixNorm
-#' @aliases makeMatrixNorm
-#' @param mean A numerical vector of length 2 specifying the mean values for each group.
-#' @param sd A numerical vector of length 2 specifying the standard deviation for each group.
-#' @param dim The number of dimensions (columns) to generate.
-#' @param points The number of data points in each group.
-#' @param seed Allows the user to set the seed previous to calling rnorm.
-#' @param ... Arguments to pass on.
-#' @author Jason Serviss
-#' @keywords makeMatrixNorm
-#' @examples
-#'
-#' mat <- makeMatrixNorm(mean=c(0,0), sd=c(1,1), dim=2, points=1000)
-#'
-#'
-NULL
-#' @export
-
-makeMatrixNorm <- function(
-mean = c(0, 0),
-sd = c(1, 1),
-dim,
-points,
-seed = 3,
-...
-) {
-    set.seed(seed)
-    
-    mat <- matrix(
-        c(
-            sapply(1:dim, function(xi)
-                c(
-                    rnorm(
-                        points,
-                        mean[1],
-                        sd[1]
-                    ),
-                    rnorm(
-                        points,
-                        mean[2],
-                        sd[2]
-                    )
-                )
-            )
-        ), ncol = dim
-    )
-    output <- list(mat, mean, sd)
-    class(output) <- "makeMatrix"
-    return(output)
-}
-
-#' Make Skewed Normal Matrix
-#'
-#' This function is specifically designed for the generation of 2 groups of points within a matrix where each dimension for each group is normally distributed and skewed paramater (xi).
-#'
-#' Makes a matrix with containing data for two groups of points.
-#' Specifying a specific number of points, dimensions, and mean,
-#' standard deviation, and skewedness for all groups and dimensions is suported.
-#' The resulting matrix will have group 1 occupying the top half of
-#' the matrix and group 2 the bottom half.
-#'
-#'
-#' @name makeMatrixSkew
-#' @rdname makeMatrixSkew
-#' @aliases makeMatrixSkew
-#' @param mean A numerical vector of length 2 specifying the mean values for each group.
-#' @param sd A numerical vector of length 2 specifying the standard deviation for each group.
-#' @param xi Skewedness paramater.
-#' @param dim The number of dimensions (columns) to generate.
-#' @param points The number of data points in each group.
-#' @param seed Allows the user to set the seed previous to calling rnorm.
-#' @param ... Arguments to pass on.
-#' @author Jason Serviss
-#' @keywords makeMatrixSkew
-#' @examples
-#'
-#' mat <- makeMatrixSkew(mean=c(0,0), sd=c(1,1), xi=c(3,-3), dim=2, points=1000)
-#'
-#'
-NULL
-#' @export
-#' @importFrom fGarch rsnorm
-
-makeMatrixSkew <- function(
-    mean = c(0, 0),
-    sd = c(1, 1),
-    xi = c(10, -10),
-    dim,
-    points,
-    seed = 3,
-    ...
-) {
-    set.seed(seed)
-    
-    mat <- matrix(
-        c(
-            sapply(1:dim, function(xx)
-                c(
-                    rsnorm(
-                        points,
-                        mean[1],
-                        sd[1],
-                        xi[1]
-                    ),
-                    rsnorm(
-                        points,
-                        mean[2],
-                        sd[2],
-                        xi[2]
-                    )
-                )
-            )
-        ), ncol = dim
-    )
-    output <- list(mat, mean, sd, xi)
-    class(output) <- "makeMatrix"
-    return(output)
-}
-
 #' Make Groups
 #'
 #' This function makes the \code{groups} input variable to ClusterSignificance from a
@@ -454,8 +323,7 @@ NULL
 
 dynamicXY <- function(
     desiredOverlap
-) {
-    data(overlapTable)
+){
     
     #below, y is set to the values used for the calculation of
     #the overlapTable
@@ -470,31 +338,39 @@ dynamicXY <- function(
     ##in the table for the desired overlap and that overlap is
     ##not 100
     
-    ##else if handles a 100 percent overlap
-    
+    ##the first else if handles a 100 percent overlap
+    ##the 2nd else if handles a 0 percent overlap
+
     ##else handles the case where the overlap is not found
     if(
-        nrow(subset(
+        desiredOverlap != 100 &
+        desiredOverlap != 0
+    ) {
+        if(
+            nrow(subset(
                 overlapTable,
                 overlap == desiredOverlap
-        )) == 1 &
-        desiredOverlap != 100
-    ) {
-        
-        x1 <- as.numeric(
-            subset(
-                overlapTable,
-                overlap == desiredOverlap,
-                select="x1"
-            )[1:1,]
-        )
-        
-        x2 <- x1 + 100
-        xOut <- c(x1, x2)
+            )) == 1
+        ){
+            x1 <- as.numeric(
+                subset(
+                    overlapTable,
+                    overlap == desiredOverlap,
+                    select="x1"
+                )[1:1,]
+            )
+            
+            x2 <- x1 + 100
+            xOut <- c(x1, x2)
+        }
         
     } else if(desiredOverlap == 100) {
         
         xOut <- yOut
+        
+    } else if(desiredOverlap == 0) {
+        
+        xOut <- c(101, 101+100)
         
     } else {
         
@@ -512,370 +388,76 @@ dynamicXY <- function(
     return(list(xOut, yOut))
 }
 
-#' Plot Overlaps
+#' Add data point
 #'
-#' Plots the group overlaps in 2 dimensions for a given matrix and groups.
+#' Adds one point to each group in the matrix.
 #'
+#' This function is designed to add one point in each dimension per group to the current matrix.
+#' The points that are added are done so with a call to \code{\link{makeMatrix}} where the \code{x}
+#' and \code{y} arguments are identical to the origional matrix. The function is primairly designed
+#' to work with the \code{\link{zeroOrHundred}} function.
 #'
-#' @name visualizeOverlaps
-#' @rdname visualizeOverlaps
-#' @aliases visualizeOverlaps
-#' @param mat The matrix to be checked.
-#' @param groups A character vector indicating the groups location within the matrix. Can be generated with the makeGroups function.
+#' @name addOnePoint
+#' @rdname addOnePoint
+#' @aliases addOnePoint
+#' @param mat from makeMatrix
+#' @param groups from makeGroups
+#' @param seed passed to set.seed
 #' @author Jason Serviss
-#' @keywords visualizeOverlaps
+#' @keywords addOnePoint
 #' @examples
-#'
-#' x1 <- 0
-#' x2 <- x1+1
-#' mat <- makeMatrix(x=c(x1,x2), y=c(0,1), dim=2, points=10)[[1]]
-#' groups <- makeGroups(mat, names=c("grp1", "grp2"))
-#'
-#' visualizeOverlaps(mat, groups)
-#'
-#'
+#' mat <- makeMatrix(x=c(0,100), y=c(0, 100), dim=2, points=10)
+#' groups <- makeGroups(mat, names=c("grp1", "gpr2"))
+#' matPlus <- addOnePoint(mat, groups)
 NULL
 #' @export
-#' @import ggplot2
-#' @importFrom reshape2 melt
-#' @importFrom ggthemes theme_few scale_colour_ptol
-#' @importFrom plyr ddply summarize
 
-visualizeOverlaps <- function(
+addOnePoint <- function(
     mat,
     groups,
-    cex=1,
-    alpha=0.6,
-    title=NULL,
-    subtitle=NULL,
-    plotType="lines"
-) {
+    seed = 3
+){
     
+    #input check
     if(length(mat[[1]]) == 1){
         stop("the matrix you submitted is not properly formated")
     }
     
-    mat <- mat[[1]]
-    mat <- data.frame(
-        dim1 = mat[,1],
-        dim2 = mat[,2],
-        groups = groups
+    #extract the matris and the x and y values used to generate it
+    m <- mat[[1]]
+    x <- mat[[2]]
+    y <- mat[[3]]
+    
+    #etract the values corresponding to both groups from the matrix
+    t <- ifelse(
+        groups == unique(groups)[1],
+        TRUE,
+        FALSE
     )
     
-    m <- melt(mat)
+    m1 <- m[t, ]
+    m2 <- m[!t, ]
     
-    m2 <- ddply(
-        m,
-        c(
-            "groups",
-            "variable"
-        ),
-        plyr::summarize,
-        median = median(value),
-        min = min(value),
-        max = max(value)
-    )
+    #make the points to add to the input matrix
+    #utilize the same x and y values as the input matrix
+    newPoints <- makeMatrix(
+        x=x,
+        y=y,
+        dim=dim(m)[2],
+        points=1,
+        seed=seed
+    )[[1]]
     
-    if(plotType == "lines") {
-        p <- ggplot(
-            m2,
-            aes(
-                x = groups,
-                y = median,
-                colour = groups,
-                ymin = min,
-                ymax = max
-            )
-        )+
-        geom_pointrange()+
-        facet_grid(.~variable)+
-        theme_few()+
-        scale_colour_ptol()+
-        theme(
-            legend.position="none",
-            legend.title=element_blank(),
-            legend.text=element_text(size=15),
-            axis.title=element_text(size=17),
-            axis.text=element_text(size=15),
-            plot.title=element_text(
-                hjust=0.5,
-                family="ArialMT",
-                face="bold",
-                size=24
-            )
-        )
-        p
-    } else {
-        p <- ggplot(
-            mat,
-            aes(
-                x=dim1,
-                y=dim2,
-                colour=groups
-            )
-        )+
-        geom_point(size=cex, alpha=alpha)+
-        theme_few()+
-        scale_colour_ptol()+
-        theme(
-            legend.position="top",
-            legend.title=element_text(size=17),
-            legend.text=element_text(size=15),
-            axis.title=element_text(size=17),
-            axis.text=element_text(size=15),
-            plot.title=element_text(
-                hjust=0.5,
-                family="ArialMT",
-                face="plain",
-                size=24
-            ),
-            plot.subtitle=element_text(
-                hjust=0.5,
-                family="ArialMT",
-                face="italic",
-                size=17
-            )
-        )+
-        labs(
-            title=title,
-            subtitle=subtitle
-        )
-        p
-    }
-    return(p)
+    #add the new points to the input matrix
+    n1 <- rbind(m1, newPoints[1,])
+    n2 <- rbind(m2, newPoints[2,])
+    mat <- rbind(n1, n2)
+    
+    #retrun the results
+    out <- list(mat, x, y)
+    class(out) <- "makeMatrix"
+    return(out)
 }
-
-#' Perfect Array
-#'
-#'
-#'
-#' @name perfectArray
-#' @rdname perfectArray
-#' @aliases perfectArray
-#'
-#' @author Jason Serviss
-#' @keywords perfectArray
-#' @examples
-#'
-#' cat("example")
-#'
-#'
-NULL
-#' @export
-
-perfectArray <- function() {
-    
-    perfectArray <- array(
-    NA,
-    dim=c(
-            20402,
-            2,
-            100
-        )
-    )
-    
-    dimnames(perfectArray)[[3]] <- as.character(seq(100, 1, by=-1))
-    dimnames(perfectArray)[[1]] <- c(rep("grp1", 10201), rep("grp2", 10201))
-    
-    for(y in 1:100) {
-        m1 <- .firstMat()
-        m2 <- m1 + y
-        m <- rbind(m1, m2)
-        perfectArray[,,y] <- m
-    }
-    perfectArrayData <- perfectArray
-    save(perfectArrayData, file="data/perfectArrayData.rda", compress="bzip2")
-    return(perfectArrayData)
-}
-
-.firstMat <- function(by = 1) {
-    s <- seq(0, 100, by)
-    l <- length(s)
-    
-    a <- rep(s, 101)
-    b <- numeric()
-    c <- numeric()
-    
-    for(i in 0:100) {
-        b <- rep(i, l)
-        c <- c(c,b)
-    }
-    
-    mv <- c(a,c)
-    m <- matrix(mv, ncol=2)
-    return(m)
-}
-
-#' Normal Array
-#'
-#'
-#'
-#' @name normalArray
-#' @rdname normalArray
-#' @aliases normalArray
-#'
-#' @author Jason Serviss
-#' @keywords normalArray
-#' @examples
-#'
-#' cat("example")
-#'
-#'
-NULL
-#' @export
-
-normalArray <- function(dim, save=FALSE, fileName = "normalArrayData.rda") {
-    
-    normalArrayData <- array(
-        NA,
-        dim=c(
-            20000,
-            dim,
-            101
-        )
-    )
-    
-    dimnames(normalArrayData)[[3]] <- as.character(seq(0, 100, by=1))
-    dimnames(normalArrayData)[[1]] <- c(rep("grp1", 10000), rep("grp2", 10000))
-    
-    for(uu in 0:100) {
-        mat <- makeMatrixNorm(
-            mean=c(0,uu),
-            sd=c(11.5,11.5),
-            points=10000,
-            dim=dim,
-            seed=uu
-        )
-        normalArrayData[,,(uu+1)] <- mat[[1]]
-    }
-    
-    if(save) {
-        save(
-            normalArrayData,
-            file=paste("data", fileName, sep="/"),
-            compress="bzip2"
-        )
-    }
-    
-    return(normalArrayData)
-}
-
-#' Standard Deviation Array
-#'
-#'
-#'
-#' @name sdArray
-#' @rdname sdArray
-#' @aliases sdArray
-#'
-#' @author Jason Serviss
-#' @keywords sdArray
-#' @examples
-#'
-#' cat("example")
-#'
-#'
-NULL
-#' @export
-
-sdArray <- function(dim, save=FALSE, fileName="sdArrayData.rda" ) {
-    sdArrayData <- array(
-        NA,
-        dim=c(
-            20000,
-                dim,
-                40,
-                2
-        )
-    )
-    
-    dimnames(sdArrayData)[[3]] <- as.character(seq(1, 40, by=1))
-    dimnames(sdArrayData)[[1]] <- c(rep("grp1", 10000), rep("grp2", 10000))
-    dimnames(sdArrayData)[[4]] <- c('even', 'uneven')
-    
-    s <- seq(1, 40, 1)
-    for(uu in 1:length(s)) {
-        vv <- s[uu]/2
-        even <- makeMatrixNorm(mean=c(1,1.3), sd=c(vv,vv), points=10000, dim=dim, seed=uu)
-        uneven <- makeMatrixNorm(mean=c(1,1.3), sd=c(1,s[uu]), points=10000, dim=dim, seed=uu)
-
-        sdArrayData[,,uu,'even'] <- even[[1]]
-        sdArrayData[,,uu,'uneven'] <- uneven[[1]]
-
-    }
-    
-    if(save) {
-        save(sdArrayData, file=paste("data", fileName, sep="/"), compress="bzip2")
-    }
-    
-    return(sdArrayData)
-}
-
-#' Plot Array
-#'
-#'
-#'
-#' @name plotArray
-#' @rdname plotArray
-#' @aliases plotArray
-#'
-#' @author Jason Serviss
-#' @keywords plotArray
-#' @examples
-#'
-#' cat("example")
-#'
-#'
-NULL
-#' @export
-#' @importFrom ggthemes theme_few scale_colour_economist
-#' @import ggplot2
-
-plotArray <- function(array, index=1) {
-    mat <- array[,,index]
-    name <- dimnames(array)[[3]][index]
-    grps <- rownames(mat)
-    dat <- as.data.frame(mat)
-    dat$groups <- grps
-    
-    p <- ggplot(dat, aes(x=V1, y=V2, colour=groups))+
-        geom_point(alpha=0.7)+
-        theme_few()+
-        theme(
-            axis.text.x=element_text(size=15),
-            axis.text.y=element_text(size=15),
-            plot.title=element_text(
-                hjust=0.5,
-                family="Arial",
-                face="bold",
-                size=24,
-                margin=margin(b=15)
-            ),
-            axis.title.x=element_text(
-                size=17,
-                margin=margin(t=10)
-            ),
-            axis.title.y=element_text(
-                size=17,
-                margin=margin(r=10)
-            ),
-            legend.title=element_text(size=17, face="bold"),
-            legend.text=element_text(size=15),
-            legend.position="top"
-        )+
-        scale_colour_economist(name="Groups")+
-        labs(
-            title=name,
-            x="Dim 1",
-            y="Dim 2"
-        )+
-        geom_rug(alpha=0.5)
-        
-        p
-        return(p)
-}
-
-
 
 #' Zero or Hundred Matrix
 #'
@@ -911,6 +493,7 @@ zeroOrHundred <- function(
     reps = 10,
     p = 5:100,
     verbose = TRUE,
+    checksVerbose = FALSE,
     save=TRUE
 ) {
     
@@ -999,7 +582,7 @@ zeroOrHundred <- function(
                         desiredOverlap = overlap,
                         interspersionThreshold = interspersionThreshold,
                         idPointsThreshold = 1,
-                        verbose = FALSE
+                        verbose = ifelse(checksVerbose == TRUE, TRUE, FALSE)
                     )[[9]]
                     
                     if(checks == 0) {break}
@@ -1038,147 +621,19 @@ zeroOrHundred <- function(
     return(output)
 }
 
-#' Add data point
-#'
-#' Adds one point to each group in the matrix.
-#'
-#' This function is designed to add one point in each dimension per group to the current matrix.
-#' The points that are added are done so with a call to \code{\link{makeMatrix}} where the \code{x}
-#' and \code{y} arguments are identical to the origional matrix. The function is primairly designed
-#' to work with the \code{\link{zeroOrHundred}} function.
-#'
-#' @name addOnePoint
-#' @rdname addOnePoint
-#' @aliases addOnePoint
-#' @param mat from makeMatrix
-#' @param groups from makeGroups
-#' @param seed passed to set.seed
-#' @author Jason Serviss
-#' @keywords addOnePoint
-#' @examples
-#' mat <- makeMatrix(x=c(0,100), y=c(0, 100), dim=2, points=10)
-#' groups <- makeGroups(mat, names=c("grp1", "gpr2"))
-#' matPlus <- addOnePoint(mat, groups)
-NULL
-#' @export
-
-addOnePoint <- function(
-    mat,
-    groups,
-    seed = 3
-) {
-    
-    #input check
-    if(length(mat[[1]]) == 1){
-        stop("the matrix you submitted is not properly formated")
-    }
-    
-    #extract the matris and the x and y values used to generate it
-    m <- mat[[1]]
-    x <- mat[[2]]
-    y <- mat[[3]]
-    
-    #etract the values corresponding to both groups from the matrix
-    t <- ifelse(
-        groups == unique(groups)[1],
-        TRUE,
-        FALSE
-    )
-    
-    m1 <- m[t, ]
-    m2 <- m[!t, ]
-    
-    #make the points to add to the input matrix
-    #utilize the same x and y values as the input matrix
-    newPoints <- makeMatrix(
-        x=x,
-        y=y,
-        dim=dim(m)[2],
-        points=1,
-        seed=seed
-    )[[1]]
-    
-    #add the new points to the input matrix
-    n1 <- rbind(m1, newPoints[1,])
-    n2 <- rbind(m2, newPoints[2,])
-    mat <- rbind(n1, n2)
-    
-    #retrun the results
-    out <- list(mat, x, y)
-    class(out) <- "makeMatrix"
-    return(out)
-}
-
-#' Make permutation matrix
-#'
-#' The .permMatrix function from ClusterSignificance.
-#'
-#'
-#' @name permMatrix
-#' @rdname permMatrix
-#' @aliases permMatrix
-#' @param mat from makeMatrix
-#' @param groups from makeGroups
-#' @param iterations number of iterations.
-#' @author Jason Serviss
-#' @keywords permMatrix
-#' @examples
-#'
-#' mat <- makeMatrix(x=c(0,100), y=c(0, 100), dim=2, points=10)
-#' groups <- makeGroups(mat, names=c("grp1", "gpr2"))
-#' matPlus <- addOnePoint(mat, groups)
-#'
-#'
-NULL
-#' @export
-
-## the permutation matrix function from ClusterSignificance
-## takes a matrix as input, permutes the data x times, and outputs the result.
-
-permMatrix <- function(
-    mat,
-    groups,
-    iterations
-) {
-    
-    uniq.groups <- combn(
-        unique(groups),
-        2
-    )
-    
-    permats <- lapply(
-        1:ncol(uniq.groups),
-        function(y)
-            lapply(
-                1:iterations,
-                function(x)
-                    sapply(
-                        1:ncol(mat[groups %in% uniq.groups[, y], ]),
-                        function(i)
-                            mat[groups %in% uniq.groups[, y], i] <-
-                                sample(
-                                    mat[groups %in% uniq.groups[, y], i],
-                                    replace=FALSE
-                                )
-                    )
-            )
-    )
-    
-    return(permats)
-}
-
 #' Overlap Probability Function
 #'
 #' This function generates a table that contains the probability of generating a specific overlap between groups
 #' when starting with a specific x value.
 #'
-#' The function works by examining probability of every x value from 0-1 by 0.001 to generate a matrix with a specific group
-#' overlap. x, in this case, is x[1] supplied to \code{\link{makeMatrix}} and x[2] = x[1] + 1. A matrix is generated 1000 times for each x
+#' The function works by examining probability of every x value from 0-100 by 0.9 to generate a matrix with a specific group
+#' overlap. x, in this case, is x[1] supplied to \code{\link{makeMatrix}} and x[2] = x[1] + 100. A matrix is generated \code{reps} times for each x
 #' using the \code{\link{makeMatrix}} function. The overlap between groups is then calculated. When this process completes, a lookup table is
 #' generated. Each x is listed in the lookup table together with the overlap generated in dimension 1 and 2. It was found that
 #' the same overlap is observed in each dimension and that the probability for each overlap is 100 percent (i.e. same overlap observed
-#' in all 1000 trials). The lookup table is output as a data frame, primiarly, for use by the \code{\link{overlapMatrices}} function.
+#' in all trials). The lookup table is output as a data frame, primiarly, for use by the \code{\link{overlapMatrices}} function.
 #' Note that the 100 percent overlap for both dims is missing from the table and is currently handled by the \code{\link{dymanicXY}} function.
+#' As well, the lookup table does include the 0 percent overlap but this is overridden by the \code{\link{dynamicXY}} function.
 #'
 #' @name overlapProbability
 #' @rdname overlapProbability
@@ -1203,7 +658,7 @@ overlapProbability <- function(
     #syntactic sugar
     g(pointsOverlaps, count) %=% list(data.frame(), 1)
     
-    #the first loop was included with the origional thought of having a
+    #the first loop was included with the original thought of having a
     #overlap table with many different points amounts, although, after
     #the realization that not all overlaps can be generated with any points
     #amount, the function was always run with points = 102, due to the fact
@@ -1221,7 +676,7 @@ overlapProbability <- function(
         #the y range
         for(i in 1:length(x1)) {
             
-            #make an array tokeep track of matrices which have already
+            #make an array to keep track of matrices which have already
             #been tested so they are not tested again
             otherMatrices <- array(
                 rep(0, c*2*2*reps),
@@ -1253,7 +708,8 @@ overlapProbability <- function(
                     points = c,
                     by = by,
                     otherMatrices = otherMatrices,
-                    idPointsThreshold = 3
+                    idPointsThreshold = 3,
+                    verbose = ifelse(verbose == TRUE, TRUE, FALSE)
                 )[[1]]
                 
                 #add the matrix to the tracking array, explained above
@@ -1313,9 +769,9 @@ overlapProbability <- function(
     
     if(save == TRUE) {
         save(
-        overlapTable,
-        file = "data/overlapTable.rda",
-        compress="bzip2"
+            overlapTable,
+            file = "data/overlapTable.rda",
+            compress="bzip2"
         )
     }
     
@@ -1347,7 +803,7 @@ overlapProbability <- function(
     x1,
     overlap,
     mat
-) {
+){
     add <- data.frame(
         points = c,
         reps = z,
@@ -1357,6 +813,64 @@ overlapProbability <- function(
         stringsAsFactors = FALSE
     )
     return(add)
+}
+
+#' Make permutation matrix
+#'
+#' The .permMatrix function from ClusterSignificance.
+#'
+#'
+#' @name permMatrix
+#' @rdname permMatrix
+#' @aliases permMatrix
+#' @param mat from makeMatrix
+#' @param groups from makeGroups
+#' @param iterations number of iterations.
+#' @author Jason Serviss
+#' @keywords permMatrix
+#' @examples
+#'
+#' mat <- makeMatrix(x=c(0,100), y=c(0, 100), dim=2, points=10)
+#' groups <- makeGroups(mat, names=c("grp1", "gpr2"))
+#' matPlus <- addOnePoint(mat, groups)
+#'
+#'
+NULL
+#' @export
+
+## the permutation matrix function from ClusterSignificance
+## takes a matrix as input, permutes the data x times, and outputs the result.
+
+permMatrix <- function(
+    mat,
+    groups,
+    iterations
+){
+    
+    uniq.groups <- combn(
+        unique(groups),
+        2
+    )
+    
+    permats <- lapply(
+        1:ncol(uniq.groups),
+        function(y)
+            lapply(
+                1:iterations,
+                function(x)
+                    sapply(
+                        1:ncol(mat[groups %in% uniq.groups[, y], ]),
+                        function(i)
+                            mat[groups %in% uniq.groups[, y], i] <-
+                                sample(
+                                    mat[groups %in% uniq.groups[, y], i],
+                                    replace=FALSE
+                                )
+                    )
+            )
+    )
+    
+    return(permats)
 }
 
 ############################################################################################################
@@ -1457,13 +971,13 @@ matrixTests <- function(
         
         #check the group overlap in the current matrix
         if("overlapSpecificMatrix" %in% tests | "all" %in% tests) {
-            overlap1 <- calculateOverlap(mat[,1], groups)
-            overlap2 <- calculateOverlap(mat[,2], groups)
+            overlap1 <- calculateOverlap(mat[[1]][,1], groups)
+            overlap2 <- calculateOverlap(mat[[1]][,2], groups)
 
             testOutput <- c(testOutput, overlap1 == desiredOverlap & overlap2 == desiredOverlap)
             
             if(verbose == TRUE) {
-                print(paste("overlaps: ", overlaps, sep=""))
+                print(paste("overlaps:", overlap1, overlap2, sep=" "))
             }
         }
         
@@ -1497,6 +1011,10 @@ matrixTests <- function(
         if(all(testOutput == TRUE)) {
             if(verbose == TRUE){print("complete")}
             break
+        }
+        
+        if(verbose == TRUE) {
+            print(paste("testOutput", testOutput, sep=": "))
         }
         
         ##if the matrix didn't pass all tests, generate a new matrix
@@ -1932,6 +1450,144 @@ checkIdenticalPoints <- function(
     return(output)
 }
 
+############################################################################################################
+#                                                                                                          #
+#                                               Plotting                                                   #
+#                                                                                                          #
+############################################################################################################
+
+#' Plot Overlaps
+#'
+#' Plots the group overlaps in 2 dimensions for a given matrix and groups.
+#'
+#'
+#' @name visualizeOverlaps
+#' @rdname visualizeOverlaps
+#' @aliases visualizeOverlaps
+#' @param mat The matrix to be checked.
+#' @param groups A character vector indicating the groups location within the matrix. Can be generated with the makeGroups function.
+#' @author Jason Serviss
+#' @keywords visualizeOverlaps
+#' @examples
+#'
+#' x1 <- 0
+#' x2 <- x1+1
+#' mat <- makeMatrix(x=c(x1,x2), y=c(0,1), dim=2, points=10)[[1]]
+#' groups <- makeGroups(mat, names=c("grp1", "grp2"))
+#'
+#' visualizeOverlaps(mat, groups)
+#'
+#'
+NULL
+#' @export
+#' @import ggplot2
+#' @importFrom reshape2 melt
+#' @importFrom ggthemes theme_few scale_colour_ptol
+#' @importFrom plyr ddply summarize
+
+visualizeOverlaps <- function(
+    mat,
+    groups,
+    cex=1,
+    alpha=0.6,
+    title=NULL,
+    subtitle=NULL,
+    plotType="lines"
+){
+    
+    if(length(mat[[1]]) == 1){
+        stop("the matrix you submitted is not properly formated")
+    }
+    
+    mat <- mat[[1]]
+    mat <- data.frame(
+        dim1 = mat[,1],
+        dim2 = mat[,2],
+        groups = groups
+    )
+    
+    m <- melt(mat)
+    
+    m2 <- ddply(
+        m,
+        c(
+            "groups",
+            "variable"
+        ),
+        plyr::summarize,
+        median = median(value),
+        min = min(value),
+        max = max(value)
+    )
+    
+    if(plotType == "lines") {
+        p <- ggplot(
+            m2,
+            aes(
+                x = groups,
+                y = median,
+                colour = groups,
+                ymin = min,
+                ymax = max
+            )
+        )+
+        geom_pointrange()+
+        facet_grid(.~variable)+
+        theme_few()+
+        scale_colour_ptol()+
+        theme(
+            legend.position="none",
+            legend.title=element_blank(),
+            legend.text=element_text(size=15),
+            axis.title=element_text(size=17),
+            axis.text=element_text(size=15),
+            plot.title=element_text(
+                hjust=0.5,
+                family="ArialMT",
+                face="bold",
+                size=24
+            )
+        )
+        p
+    } else {
+        p <- ggplot(
+            mat,
+            aes(
+                x=dim1,
+                y=dim2,
+                colour=groups
+            )
+        )+
+        geom_point(size=cex, alpha=alpha)+
+        theme_few()+
+        scale_colour_ptol()+
+        theme(
+            legend.position="top",
+            legend.title=element_text(size=17),
+            legend.text=element_text(size=15),
+            axis.title=element_text(size=17),
+            axis.text=element_text(size=15),
+            plot.title=element_text(
+                hjust=0.5,
+                family="ArialMT",
+                face="plain",
+                size=24
+            ),
+            plot.subtitle=element_text(
+                hjust=0.5,
+                family="ArialMT",
+                face="italic",
+                size=17
+            )
+        )+
+        labs(
+            title=title,
+            subtitle=subtitle
+        )
+        p
+    }
+    return(p)
+}
 
 
 

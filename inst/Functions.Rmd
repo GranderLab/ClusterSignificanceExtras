@@ -21,8 +21,8 @@ This document is to highlight the capability of the functions used for testing t
 
 <br></br>
 
-```{r setup, include=FALSE}
-library(ClusterSignificanceTestingSuite)
+```{r setup, include=FALSE, message=FALSE}
+library(ClusterSignificanceTesting)
 library(printr)
 library(knitr)
 
@@ -37,30 +37,110 @@ insert_fun = function(name) {
 ```
 
 ```{r, echo=FALSE}
+#sensitivity specificity and general functions
+makeMatrix <- ClusterSignificanceTesting::makeMatrix
 insert_fun("makeMatrix")
+
+makeGroups <- ClusterSignificanceTesting::makeGroups
 insert_fun("makeGroups")
+
+overlapProbability <- ClusterSignificanceTesting::overlapProbability
 insert_fun("overlapProbability")
-.savePointsOverlaps <- ClusterSignificanceTestingSuite:::.savePointsOverlaps
+
+.savePointsOverlaps <- ClusterSignificanceTesting:::.savePointsOverlaps
 insert_fun(".savePointsOverlaps")
-.createMatAndGroups <- ClusterSignificanceTestingSuite:::.createMatAndGroups
+
+.createMatAndGroups <- ClusterSignificanceTesting:::.createMatAndGroups
 insert_fun(".createMatAndGroups")
+
+dynamicXY <- ClusterSignificanceTesting::dynamicXY
 insert_fun("dynamicXY")
+
+calculateOverlap <- ClusterSignificanceTesting::calculateOverlap
 insert_fun("calculateOverlap")
+
+addOnePoint <- ClusterSignificanceTesting::addOnePoint
 insert_fun("addOnePoint")
+
+interspersion <- ClusterSignificanceTesting::interspersion
 insert_fun("interspersion")
+
+checkIdenticalDims <- ClusterSignificanceTesting::checkIdenticalDims
 insert_fun("checkIdenticalDims")
+
+checkIdenticalMatrix <- ClusterSignificanceTesting::checkIdenticalMatrix
 insert_fun("checkIdenticalMatrix")
+
+overlapMatrices <- ClusterSignificanceTesting::overlapMatrices
 insert_fun("overlapMatrices")
+
+zeroOrHundred <- ClusterSignificanceTesting::zeroOrHundred
 insert_fun("zeroOrHundred")
-insert_fun("falseNegativeTest")
-insert_fun("falsePositiveTest")
+
+sensitivityTest <- ClusterSignificanceTesting::sensitivityTest
+insert_fun("sensitivityTest")
+
+specificityTest <- ClusterSignificanceTesting::specificityTest
+insert_fun("specificityTest")
+
+matrixTests <- ClusterSignificanceTesting::matrixTests
 insert_fun("matrixTests")
-.regenerate <- ClusterSignificanceTestingSuite:::.regenerate
+
+.regenerate <- ClusterSignificanceTesting:::.regenerate
 insert_fun(".regenerate")
+
+#hematologicalCancers and corresponding plotting functions
+hematologicalCancers <- ClusterSignificanceTesting:::hematologicalCancers
+insert_fun("hematologicalCancers")
+
+.downloadAndProcessData <- ClusterSignificanceTesting:::.downloadAndProcessData
+insert_fun(".downloadAndProcessData")
+
+.annotateBiotypes <- ClusterSignificanceTesting:::.annotateBiotypes
+insert_fun(".annotateBiotypes")
+
+.filterLongNonCoding <- ClusterSignificanceTesting:::.filterLongNonCoding
+insert_fun(".filterLongNonCoding")
+
+.renamePhenos <- ClusterSignificanceTesting:::.renamePhenos
+insert_fun(".renamePhenos")
+
+.runTsne <- ClusterSignificanceTesting:::.runTsne
+insert_fun(".runTsne")
+
+.runPcp <- ClusterSignificanceTesting:::.runPcp
+insert_fun(".runPcp")
+
+##tsnePlots
+tsnePlots <- ClusterSignificanceTesting:::tsnePlots
+insert_fun("tsnePlots")
+
+.dimX <- ClusterSignificanceTesting:::.dimX
+insert_fun(".dimX")
+
+.dimY <- ClusterSignificanceTesting:::.dimY
+insert_fun(".dimY")
+
+.dimZ <- ClusterSignificanceTesting:::.dimZ
+insert_fun(".dimZ")
+
+##normalMDS plots
+normalMDS <- ClusterSignificanceTesting:::normalMDS
+insert_fun("normalMDS")
+
+.view1 <- ClusterSignificanceTesting:::.view1
+insert_fun(".view1")
+
+.view2 <- ClusterSignificanceTesting:::.view2
+insert_fun(".view2")
+
+.view3 <- ClusterSignificanceTesting:::.view3
+insert_fun(".view3")
 ```
 
-#Lower level functions {.tabset}
-##makeMatrix
+# General and specificity/sensitivity testing functions {.tabset}
+## Lower level functions {.tabset}
+###makeMatrix
 ```{r}
 help('makeMatrix')
 ```
@@ -69,7 +149,7 @@ help('makeMatrix')
 ```{r, makeMatrix-source}
 ```
 
-##makeGroups
+###makeGroups
 ```{r}
 help('makeGroups')
 ```
@@ -77,7 +157,7 @@ help('makeGroups')
 ```{r, makeGroups-source}
 ```
 
-##overlapProbability
+###overlapProbability
 ```{r}
 help(overlapProbability)
 ```
@@ -85,15 +165,15 @@ help(overlapProbability)
 ```{r, overlapProbability-source}
 ```
 
-### .savepointsOverlaps
+#### .savepointsOverlaps
 ```{r, .savePointsOverlaps-source}
 ```
 
-### .createMatAndGroups
+#### .createMatAndGroups
 ```{r, .createMatAndGroups-source}
 ```
 
-##dynamicXY
+###dynamicXY
 ```{r}
 help('dynamicXY')
 ```
@@ -101,7 +181,7 @@ help('dynamicXY')
 ```{r, dynamicXY-source}
 ```
 
-##addOnePoint
+###addOnePoint
 ```{r}
 help('addOnePoint')
 ```
@@ -109,11 +189,10 @@ help('addOnePoint')
 ```{r, addOnePoint-source}
 ```
 
-#
 <br></br><br></br><br></br>
 
-#Matrix Checks {.tabset}
-##calculateOverlap
+## Matrix Checks {.tabset}
+###calculateOverlap
 ```{r}
 help('calculateOverlap')
 ```
@@ -121,7 +200,7 @@ help('calculateOverlap')
 ```{r, calculateOverlap-source}
 ```
 
-##interspersion
+###interspersion
 ```{r}
 help(interspersion)
 ```
@@ -146,7 +225,7 @@ interspersion(mat, groups, 1)
 
 We can see that in the first example (left) that group 2 is highly interspersed within group 1 and therefore, the interspersion score is high. On the other hand, in the second example (right) group 2 has a low interspersion within group 1 and, therefore, the interspersion score is low.
 
-##checkIdenticalDims
+###checkIdenticalDims
 ```{r}
 help('checkIdenticalDims')
 ```
@@ -169,7 +248,7 @@ checkIdenticalDims(mat, groups)
 ```
 </div>
 
-##checkIdenticalMatrix
+###checkIdenticalMatrix
 ```{r}
 help('checkIdenticalMatrix')
 ```
@@ -177,7 +256,7 @@ help('checkIdenticalMatrix')
 ```{r, checkIdenticalMatrix-source}
 ```
 
-##checkIdenticalPoints
+###checkIdenticalPoints
 ```{r}
 help('checkIdenticalPoints')
 ```
@@ -185,7 +264,7 @@ help('checkIdenticalPoints')
 ```{r, checkIdenticalPoints-source}
 ```
 
-##matrixTests
+###matrixTests
 ```{r}
 help('matrixTests')
 ```
@@ -193,15 +272,14 @@ help('matrixTests')
 ```{r, matrixTests-source}
 ```
 
-### .regenerate
+#### .regenerate
 ```{r, .regenerate-source}
 ```
 
-#
 <br></br><br></br><br></br>
 
-#Higher level functions {.tabset}
-##overlapMatrices
+## Higher level functions {.tabset}
+###overlapMatrices
 ```{r}
 help('overlapMatrices')
 ```
@@ -209,7 +287,7 @@ help('overlapMatrices')
 ```{r, overlapMatrices-source}
 ```
 
-##zeroOrHundred
+###zeroOrHundred
 ```{r}
 help('zeroOrHundred')
 ```
@@ -217,18 +295,93 @@ help('zeroOrHundred')
 ```{r, zeroOrHundred-source}
 ```
 
-##falseNegativeTest
+###sensivitityTest
 ```{r}
-help('falseNegativeTest')
+help('sensitivityTest')
 ```
 
-```{r, falseNegativeTest-source}
+```{r, sensitivityTest-source}
 ```
 
-##falsePositiveTest
+###specificityTest
 ```{r}
-help('falsePositiveTest')
+help('specificityTest')
 ```
 
-```{r, falsePositiveTest-source}
+```{r, specificityTest-source}
+```
+
+# Hematological cancers functions {.tabset}
+## Download and analysis functions {.tabset}
+### hematologicalCancers
+```{r}
+help('hematologicalCancers')
+```
+
+```{r, hematologicalCancers-source}
+```
+
+#### .downloadAndProcessData
+```{r, .downloadAndProcessData-source}
+```
+
+#### .annotateBiotypes
+```{r, .annotateBiotypes-source}
+```
+
+#### .filterLongNonCoding
+```{r, .filterLongNonCoding-source}
+```
+
+#### .renamePhenos
+```{r, .renamePhenos-source}
+```
+
+#### .runTsne
+```{r, .runTsne-source}
+```
+
+#### .runPcp
+```{r, .runPcp-source}
+```
+
+## Plotting functions {.tabset}
+### tsnePlots
+```{r}
+help('tsnePlots')
+```
+
+```{r, tsnePlots-source}
+```
+
+#### .dimX
+```{r, .dimX-source}
+```
+
+#### .dimY
+```{r, .dimY-source}
+```
+
+#### .dimZ
+```{r, .dimZ-source}
+```
+
+### normalMDS
+```{r}
+help('normalMDS')
+```
+
+```{r, normalMDS-source}
+```
+
+#### .view1
+```{r, .view1-source}
+```
+
+#### .view2
+```{r, .view2-source}
+```
+
+#### .view3
+```{r, .view3-source}
 ```

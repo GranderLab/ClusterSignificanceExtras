@@ -3,6 +3,11 @@
 \name{sensSpecPlot}
 \alias{sensSpecPlot}
 \title{Sensitivity and Specificity Figure}
+\arguments{
+\item{sens}{Sensivitity testing results data.frame.}
+
+\item{spec}{Specificity testing results data.frame.}
+}
 \description{
 This function plots the specificity and sensivity testing results.
 }
