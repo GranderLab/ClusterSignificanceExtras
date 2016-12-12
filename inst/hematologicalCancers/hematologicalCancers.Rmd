@@ -12,9 +12,7 @@ output:
 ###Read Me
 For those not desiring to re-run the whole analysis from scratch, but wanting to explore and re-create the published analysis, the minimal necessary data has been included in the ClusterSignificanceTesting package to achieve this. This included data is utilized when knitting this document.
 
-If you desire to re-run the whole code rom scratch to re-create the analysis, we warn you that it can take some time. Depending on your system, the _hematologicalCancers_ function may take hours to days to run. Due to this fact, the chunk containing that function is set to eval=FALSE. We recommend running the _hematologicalCancers_ function as demonstrated in this document, save the output to your local system, and execute the downstream commands after the output from the _hematologicalCancers_ function is loaded into R. Please note, due to the nature of t-SNE, results for the clustering may not look the same if t-SNE is re-run.
-
-To increase reproducability, all of the functions needed to re-create supplementary fig. 2 are included in the raw package code but are also shown at the end of this document for convienience.
+If you desire to re-run the whole code from scratch to re-create the analysis, we warn you that it can take some time. Depending on your system, the _hematologicalCancers_ function may take hours to days to run. Due to this fact, the chunk containing that function is set to eval=FALSE. We recommend running the _hematologicalCancers_ function as demonstrated in this document, save the output to your local system, and execute the downstream commands after the output from the _hematologicalCancers_ function is loaded into R. Please note, due to the nature of t-SNE, results for the clustering may not look the same if t-SNE is re-run.
 
 ##Introduction
 lncRNAs have been reported to play an important role in cellular biological processes such as gene regulation and have also been reported to be highly cell type specific. Previously, lncRNAs have beeen shown to be differentially expressed in pediatric acute lymphoblastic leukemia with MLL t(11q23) translocations and specific expression of these lncRNAs was demonstrated to be important in regulation of the disease phenotype. Due to these reasons, we hypothesized that lncRNA expression may also be capable of distinguishing known hematopoetic malagnancies and is therefore, potentially, important for regulating specific gene expression driving these diseases.
@@ -72,6 +70,8 @@ table(hemCancData$characteristics_ch1.1)
 ```
 
 ##t-SNE plots {.tabset}
+Below we utilize the [tsnePlots](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/hematologicalCancers.R#L238-L380) function to plot the tsne results from several different perspectives.
+
 ###dim X
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
 tsnePlots(hemCancData, "X")
@@ -355,7 +355,7 @@ plot(pe, comparison=names(getData(pe, "scores.vec"))[21])
 ```
 
 ##Investigate the lack of a significant seperation between the MDS and normal groups {.tabset}
-The results indicate that after tSNE the normal and MDS represent a reasonably homogenous cluster and therefore, it may be expected that ClusterSignificance would not detect a significant seperation of these groups.
+Here we subset the normal and MDS patient samples from the tSNE reults and plot only those samples using the [normalMDS](https://github.com/jasonserviss/ClusterSignificanceTesting/blob/master/R/hematologicalCancers.R#L398-L540) function, allowing us to easily view only those samples. The results indicate that after tSNE the normal and MDS represent a reasonably homogenous cluster and therefore, it may be expected that ClusterSignificance would not detect a significant seperation of these groups.
 
 ###view 1
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}

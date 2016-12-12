@@ -1,11 +1,11 @@
 ---
-title: "Functions"
+title: "Functions and Datasets"
 author: "Jason T. Serviss"
 date: "30/11/2016"
 output:
     html_document:
         theme: flatly
-        toc: no
+        toc: yes
 ---
 
 <style>
@@ -385,3 +385,46 @@ help('normalMDS')
 #### .view3
 ```{r, .view3-source}
 ```
+
+# Datasets {.tabset}
+
+## Sensitivity / specificity testing datasets
+```{r}
+help('zero')
+```
+
+<br></br><br></br><br></br>
+
+```{r}
+help('hundred')
+```
+
+<br></br><br></br><br></br>
+
+```{r}
+help('sensitivityTestResults')
+```
+
+<br></br><br></br><br></br>
+
+```{r}
+help('specificityTestResults')
+```
+
+## Hematological cancer datasets
+```{r}
+help('hemCancData')
+```
+
+<br></br><br></br><br></br>
+
+```{r}
+help('lncGenes')
+```
+
+<br></br><br></br><br></br>
+
+```{r}
+help('pe')
+```
+
