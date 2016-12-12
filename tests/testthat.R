@@ -1,4 +1,4 @@
 library(testthat)
-library(ClusterSignificance-test-suite)
+library(ClusterSignificanceTesting)
 
-test_check("ClusterSignificance-test-suite")
+test_check("ClusterSignificanceTesting")

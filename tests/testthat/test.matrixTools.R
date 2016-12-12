@@ -74,7 +74,7 @@ test_that("check that the dynamicXY function returns the correct output", {
     desiredOverlap <- 100
     
     #setup expected data
-    exp <- list(c(1, 100), c(0, 101))
+    exp <- list(c(0, 101), c(0, 101))
     
     ##run function
     output <- dynamicXY(desiredOverlap)
@@ -129,14 +129,14 @@ test_that("check that the calculateOverlap function returns the correct output",
     ##prepare normal input data
     g1 <- seq(0.0, 1.0, 0.1)
     g2 <- seq(1.0, 2.0, 0.1)
-    mat <- list(matrix(c(g1, g2), ncol=1))
+    mat <- matrix(c(g1, g2), ncol=1)
     groups <- c(rep("grp1", length(g1)), rep("grp2", length(g2)))
     
     #setup expected data
     expected <- 0
     
     ##run function
-    output <- calculateOverlap(mat, groups, 1)
+    output <- calculateOverlap(mat[,1], groups, 1)
     
     ##test
     expect_equal(output, expected)
@@ -145,14 +145,14 @@ test_that("check that the calculateOverlap function returns the correct output",
     ##prepare normal input data
     g1 <- seq(0.0, 10, 1.0)
     g2 <- seq(0.1, 1.1, 0.1)
-    mat <- list(matrix(c(g1, g2), ncol=1))
+    mat <- matrix(c(g1, g2), ncol=1)
     groups <- c(rep("grp1", length(g1)), rep("grp2", length(g2)))
     
     #setup expected data
     expected <- 100
     
     ##run function
-    output <- calculateOverlap(mat, groups, 1)
+    output <- calculateOverlap(mat[,1], groups, 1)
     
     ##test
     expect_equal(output, expected)
@@ -161,14 +161,14 @@ test_that("check that the calculateOverlap function returns the correct output",
     ##prepare normal input data
     g1 <- seq(0.0, 1.0, 1.0)
     g2 <- seq(0.5, 1.5, 1.0)
-    mat <- list(matrix(c(g2, g1), ncol=1))
+    mat <- matrix(c(g2, g1), ncol=1)
     groups <- c(rep("grp1", length(g1)), rep("grp2", length(g2)))
     
     #setup expected data
     expected <- 50
     
     ##run function
-    output <- calculateOverlap(mat, groups, 1)
+    output <- calculateOverlap(mat[,1], groups, 1)
     
     ##test
     expect_equal(output, expected)
@@ -177,14 +177,14 @@ test_that("check that the calculateOverlap function returns the correct output",
     ##prepare normal input data
     g1 <- seq(0.0, 10, 1.0)
     g2 <- seq(0.1, 1.1, 0.1)
-    mat <- list(matrix(c(g2, g1), ncol=1))
+    mat <- matrix(c(g2, g1), ncol=1)
     groups <- c(rep("grp1", length(g1)), rep("grp2", length(g2)))
     
     #setup expected data
     expected <- 100
     
     ##run function
-    output <- calculateOverlap(mat, groups, 1)
+    output <- calculateOverlap(mat[,1], groups, 1)
     
     ##test
     expect_equal(output, expected)
@@ -193,14 +193,14 @@ test_that("check that the calculateOverlap function returns the correct output",
     ##prepare normal input data
     g1 <- seq(0.0, 1.0, 0.1)
     g2 <- seq(1.0, 2.0, 0.1)
-    mat <- list(matrix(c(g2, g1), ncol=1))
+    mat <- matrix(c(g2, g1), ncol=1)
     groups <- c(rep("grp1", length(g1)), rep("grp2", length(g2)))
     
     #setup expected data
     expected <- 0
     
     ##run function
-    output <- calculateOverlap(mat, groups, 1)
+    output <- calculateOverlap(mat[,1], groups, 1)
     
     ##test
     expect_equal(output, expected)
@@ -390,41 +390,6 @@ test_that("check that the checkIdenticalMatrix function returns the correct outp
 })
 
 
-test_that("check that the overlapProbability function returns the correct output", {
-    
-    ####TEST1####
-    #setup input
-    x1 <- seq(0, 101, by=1)
-    points <- 5
-    reps <- 2
-    by <- 0.9
-    
-    #setup expected data
-    out.nrow <- 2 * 102
-    out.ncol <- 6
-    x1.s <- sort(rep(seq(0, 101, by=1) , 2))
-    overlaps <- c(0, 20, 30, 40, 50, 60, 70, 80, 100) ##all possible overlaps with 5 points
-
-    ##run function
-    output <- overlapProbability(points=points, reps=reps, x1=x1, by=by, save=FALSE)
-    mat <- output[1:1, 'mat'][[1]]
-    groups <- makeGroups(mat, names=c("1", "2"))
-    spl <- split(mat[[1]], groups)
-    
-    ##test
-    expect_equal(nrow(output), out.nrow)
-    expect_equal(ncol(output), out.ncol)
-    expect_equal(output$x1, x1.s)
-    expect_true(all(output$points == 5))
-    expect_true(all(output$overlapPC1 %in% overlaps))
-    expect_true(all(output$overlapPC2 %in% overlaps))
-    expect_false(identical(output[1:1, 'mat'], output[2:2, 'mat']))
-    expect_identical(unique(output$reps), 1:reps)
-    expect_identical(unique(output$points), points)
-    expect_identical(unique(output$x1), seq(0, 101, by=1))
-})
-
-
 test_that("check that the interspersion function returns the correct output", {
     
     ####TEST1 0 percent####
@@ -505,8 +470,8 @@ test_that("check that the matrixTests function returns the correct output", {
     )[[1]]
     
     ##test
-    expect_equal(calculateOverlap(output, groups, 1), desiredOverlap)
-    expect_equal(calculateOverlap(output, groups, 2), desiredOverlap)
+    expect_equal(calculateOverlap(output[[1]][,1], groups), desiredOverlap)
+    expect_equal(calculateOverlap(output[[1]][,2], groups), desiredOverlap)
     expect_true(checkIdenticalDims(output, groups))
     expect_true(checkIdenticalMatrix(output, otherMatrices))
     expect_true(checkIdenticalPoints(output, groups, 1, idPointsThreshold))
@@ -558,8 +523,8 @@ test_that("check that the matrixTests function returns the correct output", {
     )[[1]]
     
     ##test
-    expect_equal(calculateOverlap(output, groups, 1), desiredOverlap)
-    expect_equal(calculateOverlap(output, groups, 2), desiredOverlap)
+    expect_equal(calculateOverlap(output[[1]][,1], groups), desiredOverlap)
+    expect_equal(calculateOverlap(output[[1]][,2], groups), desiredOverlap)
     expect_true(interspersion(output, groups, 1) > interspersionThreshold)
     expect_true(interspersion(output, groups, 2) > interspersionThreshold)
     expect_true(checkIdenticalDims(output, groups))
