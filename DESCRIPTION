@@ -1,5 +1,5 @@
-Package: ClusterSignificanceTesting
-Title: A test suit that is separate from the package unit tests, and has the purpose of checking that concepts and assumptions are held.
+Package: ClusterSignificanceExtras
+Title: A package allowing re-creation of all figures in the publication associated with the ClusterSignificance package.
 Version: 0.0.0.9000
 Author: Jason T. Serviss
 Maintainer: Jason T Serviss <jason.serviss@ki.se>
