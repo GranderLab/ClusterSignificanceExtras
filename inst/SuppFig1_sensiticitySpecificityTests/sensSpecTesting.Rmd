@@ -57,7 +57,7 @@ insert_fun = function(name) {
 <br></br><br></br>
 
 ```{r library, message=FALSE}
-library(ClusterSignificanceTesting)
+library(ClusterSignificanceExtras)
 ```
 
 

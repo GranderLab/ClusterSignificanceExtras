@@ -15,24 +15,14 @@ vignette: >
 ---
 
 # Read Me
-This data is used to as an easy example to understand the purpose of ClusterSignificance. It is set up so that the results can easily be anticipated before ClusterSignificance is run.
+This data is used to as an easy example to understand the purpose of ClusterSignificance. It is set up so that the results can easily be anticipated before ClusterSignificance is run. The permutation results are currently saved in the package (to save time) but, if you desire to re-run the analysis you can follow the typical ClusterSignificance pipeline using the pcpMatrix dataset in the ClusterSignificance package.
 
 ```{r, message =FALSE}
-library(ClusterSignificanceTesting)
+library(ClusterSignificanceExtras)
 
-#create data
-set.seed=123
-mat1 <- hundred['30.points'][[1]][,,1]
-add <- sample(seq(min(mat1), max(mat1), 0.001), replace=FALSE, size=30)
-mat1 <- cbind(mat1, add)
-mat2 <- matrix(sapply(1:3, function(x)
-    c(sample(seq(50, 150, 0.001),
-    replace=FALSE,
-    size=30))
-), ncol=3)
-
-mat <- rbind(mat1, mat2)
-groups <- c(rep("grp1", 30), rep("grp2", 30), rep("grp3", 30))
+#load data
+mat <- pcpMatrix
+groups <- rownames(pcpMatrix)
 
 #run ClusterSignificance projection and change colors
 prj <- pcp(mat, groups)
@@ -47,7 +37,8 @@ cl <- classify(prj)
 
 #run ClusterSignificance permutation
 set.seed(3)
-pe <- permute(mat, groups, "pcp", 10000)
+#pe <- permute(mat, groups, "pcp", 10000)
+pe <- pcpPermutations
 ```
 
 # Re-create Figure 1.
@@ -67,4 +58,10 @@ plot(cl, cex.points=3, cex.main=2, cex.lab=2, cex.axis=2)
 
 ```{r, fig.align='center', fig.height=8, fig.width=10, eval=TRUE, message=FALSE}
 plot(pe, cex.main=2, cex.lab=1.5, cex.axis=2, abline.lwd=1.5)
+```
+
+
+## P-values
+```{r}
+pvalue(pe)
 ```

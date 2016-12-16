@@ -1,22 +1,3 @@
-#' tSNE results from the hematological malagnancies anaysis.
-#'
-#'
-#' @title tSNE results dataset.
-#' @docType data
-#' @name hemCancData
-#' @format data.frame
-#' \describe{
-#' \item{X1}{The first tSNE dimension.}
-#' \item{X2}{The second tSNE dimension.}
-#' \item{X3}{The third tSNE dimension.}
-#' \item{geo_accession}{The sample GEO accession number.}
-#' \item{characteristics_ch1.1}{The samples cancer type.}
-#' }
-#' @usage hemCancData
-#' @return data.frame
-#' @examples
-#' hemCancData
-NULL
 
 #' Output from the zeroOrHundred function with overlap argument = 100 and other default arguments.
 #'
@@ -37,7 +18,48 @@ NULL
 #' @examples
 #' hundred
 #'
+NULL
 
+#' Output from the zeroOrHundred function with overlap argument = 0 and other default arguments.
+#'
+#'
+#' @title Zero overlap dataset.
+#' @docType data
+#' @name zero
+#' @format list of arrays
+#' \describe{
+#' \item{list names}{The number of points per group.}
+#' \item{list elements}{An array containing all repititions of the ClusterSignificance input matrix for the specific points number indicated in the list element name}
+#' \item{array dimension 1}{Rows of the input matrix to ClusterSignificance.}
+#' \item{array dimension 2}{Columns of the input matrix to ClusterSignificance.}
+#' \item{array dimension 3}{The repititions for each points per group amounts.}
+#' }
+#' @usage zero
+#' @return list of arrays
+#' @examples
+#' zero
+#'
+
+NULL
+
+#' tSNE results from the hematological malagnancies anaysis.
+#'
+#'
+#' @title tSNE results dataset.
+#' @docType data
+#' @name hemCancData
+#' @format data.frame
+#' \describe{
+#' \item{X1}{The first tSNE dimension.}
+#' \item{X2}{The second tSNE dimension.}
+#' \item{X3}{The third tSNE dimension.}
+#' \item{geo_accession}{The sample GEO accession number.}
+#' \item{characteristics_ch1.1}{The samples cancer type.}
+#' }
+#' @usage hemCancData
+#' @return data.frame
+#' @examples
+#' hemCancData
 NULL
 
 #' A character vector of lncRNA ensembl IDs included in the hematological cancer analysis.
@@ -102,24 +124,15 @@ NULL
 #' specificityTestResults
 NULL
 
-#' Output from the zeroOrHundred function with overlap argument = 0 and other default arguments.
+#' ClusterSignificance permute output from the pcpMatrix dataset.
 #'
 #'
-#' @title Zero overlap dataset.
+#' @title pcpMatrix permute result.
 #' @docType data
-#' @name zero
-#' @format list of arrays
-#' \describe{
-#' \item{list names}{The number of points per group.}
-#' \item{list elements}{An array containing all repititions of the ClusterSignificance input matrix for the specific points number indicated in the list element name}
-#' \item{array dimension 1}{Rows of the input matrix to ClusterSignificance.}
-#' \item{array dimension 2}{Columns of the input matrix to ClusterSignificance.}
-#' \item{array dimension 3}{The repititions for each points per group amounts.}
-#' }
-#' @usage zero
-#' @return list of arrays
+#' @name pcpPermutations
+#' @format PermutationResults
+#' @usage pcpPermutations
+#' @return PermutationResults
 #' @examples
-#' zero
-#'
-
+#' pcpPermutations
 NULL

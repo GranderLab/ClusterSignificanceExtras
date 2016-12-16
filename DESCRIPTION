@@ -7,7 +7,7 @@ Description: Testing results and tools for testing the ClusterSignificance
     package.
 Depends:
     R (>= 3.2.2),
-    ClusterSignificance
+    ClusterSignificance (>= 1.1.8)
 Imports:
     reshape2,
     foreach,

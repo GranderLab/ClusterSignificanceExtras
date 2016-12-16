@@ -24,7 +24,7 @@ The results indicate that, of the 21 group comparisons made 20 of those were fou
 ```{r style, echo = FALSE, results = 'asis', warning=FALSE, message=FALSE}
 BiocStyle::markdown()
 library(knitr)
-library(ClusterSignificanceTesting)
+library(ClusterSignificanceExtras)
 ##the function below allows dynamic insertion of the function source code 
 insert_fun = function(name) {
     read_chunk(
