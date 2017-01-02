@@ -6,4 +6,4 @@ Each figure is associated with one folder in the _inst_ directory. Inside each f
 
 Installing the package allows access to all functions utilized in the .Rmd file.
 
-The ClusterSignificanceExtras package is designed to work with ClusterSignificance package version 1.1.8.
+The ClusterSignificanceExtras package is designed to work with ClusterSignificance package version 1.2.2.
