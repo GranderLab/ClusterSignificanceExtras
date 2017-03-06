@@ -6,6 +6,7 @@
 #' @name hematologicalCancers
 #' @rdname hematologicalCancers
 #' @aliases hematologicalCancers
+#' @param iterations Number of permutations.
 #' @param ... Arguments to pass on.
 #' @author Jason Serviss
 #' @keywords hematologicalCancers
@@ -17,7 +18,7 @@ NULL
 #' @import biomaRt
 #' @importFrom Rtsne Rtsne
 
-hematologicalCancers <- function(...) {
+hematologicalCancers <- function(iterations=10000, ...) {
     
     tmp <- .downloadAndProcessData()
     exp <- tmp[[1]]
@@ -29,7 +30,7 @@ hematologicalCancers <- function(...) {
     pheno <- .renamePhenos(pheno)
     plot <- .runTsne(nc, pheno)
     
-    tmp <- .runPcp()
+    tmp <- .runPcp(plot)
     mat <- tmp[[1]]
     groups <- tmp[[2]]
     prj <- tmp[[3]]
@@ -42,7 +43,7 @@ hematologicalCancers <- function(...) {
     
     #cl needed for classification plots
     
-    pe <- permute(mat, groups, iter=10000, projmethod="pcp")
+    pe <- permute(mat, groups, iter=iterations, projmethod="pcp")
     pValues <- as.data.frame(pvalue(pe))
     colnames(pValues) <- "pValue"
     
@@ -51,6 +52,7 @@ hematologicalCancers <- function(...) {
     return(list(plot, group.color, prj, cl, pe, pValues, mat, groups, nc, lncGenes))
     
 }
+
 
 .downloadAndProcessData <- function() {
     gset <- getGEO("GSE13159", GSEMatrix =TRUE)[[1]]
@@ -208,7 +210,7 @@ hematologicalCancers <- function(...) {
     
     #put tSNE results and phenotype data in a data.frame
     plot <- data.frame(tsne$Y, pheno)
-    retunr(plot)
+    return(plot)
 }
 
 .runPcp <- function(plot) {
