@@ -11,12 +11,15 @@
 #' @author Jason Serviss
 #' @keywords hematologicalCancers
 #' @examples
-#' hematologicalCancers()
+#' \dontrun{hematologicalCancers()}
 NULL
 #' @export
 #' @import GEOquery
 #' @import biomaRt
 #' @importFrom Rtsne Rtsne
+#' @importFrom stats complete.cases
+#' @import Biobase
+#' @import ClusterSignificance
 
 hematologicalCancers <- function(iterations=10000, ...) {
     
@@ -68,7 +71,7 @@ hematologicalCancers <- function(iterations=10000, ...) {
 
 .annotateBiotypes <- function(exp) {
     
-    ensembl = biomaRt::useMart(
+    ensembl = useMart(
         biomart = "ENSEMBL_MART_ENSEMBL",
         dataset="hsapiens_gene_ensembl",
         host = "jul2015.archive.ensembl.org"
@@ -76,7 +79,7 @@ hematologicalCancers <- function(iterations=10000, ...) {
     
     affyids = rownames(exp)
     
-    IDs <- biomaRt::getBM(
+    IDs <- getBM(
         attributes=c(
             'affy_hg_u133_plus_2',
             'ensembl_gene_id',
@@ -152,11 +155,23 @@ hematologicalCancers <- function(iterations=10000, ...) {
     )
     
     #concatenate genetic subtypes into their respective cancer types
-    #this is done due to the fact that, if the individual genetic subtypes were retained, ClusterSignificance would need to make 153 comparisons instead of 21.
-    #153 comparisons is way too many for the publication and will provide a overwhelming amount of results, potentially being hard to interpret.
+    #this is done due to the fact that, if the individual genetic subtypes were
+    #retained, ClusterSignificance would need to make 153 comparisons instead
+    #of 21.
+    #153 comparisons is way too many for the publication and will provide a
+    #overwhelming amount of results, potentially being hard to interpret.
     
-    Ball <- c("ALL with hyperdiploid karyotype", "ALL with t(1;19)", "ALL with t(12;21)", "c-ALL/Pre-B-ALL with t(9;22)", "c-ALL/Pre-B-ALL without t(9;22)", "mature B-ALL with t(8;14)", "Pro-B-ALL with t(11q23)/MLL")
-    aml <- c("AML complex aberrant karyotype", "AML with inv(16)/t(16;16)", "AML with normal karyotype + other abnormalities", "AML with t(11q23)/MLL", "AML with t(15;17)", "AML with t(8;21)")
+    Ball <- c(
+        "ALL with hyperdiploid karyotype", "ALL with t(1;19)",
+        "ALL with t(12;21)", "c-ALL/Pre-B-ALL with t(9;22)",
+        "c-ALL/Pre-B-ALL without t(9;22)", "mature B-ALL with t(8;14)",
+        "Pro-B-ALL with t(11q23)/MLL"
+    )
+    aml <- c(
+        "AML complex aberrant karyotype", "AML with inv(16)/t(16;16)",
+        "AML with normal karyotype + other abnormalities",
+        "AML with t(11q23)/MLL", "AML with t(15;17)", "AML with t(8;21)"
+    )
     
     
     pheno$characteristics_ch1.1 <- ifelse(
@@ -232,10 +247,11 @@ hematologicalCancers <- function(iterations=10000, ...) {
 #' @author Jason Serviss
 #' @keywords tsnePlots
 #' @examples
-#' #tsnePlots()
+#' \dontrun{tsnePlots()}
 NULL
 #' @export
 #' @import scatterplot3d
+#' @importFrom grDevices rgb
 
 tsnePlots <- function(plot, dim) {
     mat <- as.matrix(plot[ ,c("X1", "X2", "X3")])
@@ -393,9 +409,11 @@ tsnePlots <- function(plot, dim) {
 #' @author Jason Serviss
 #' @keywords normalMDS
 #' @examples
-#' #normalMDS()
+#' \dontrun{normalMDS()}
 NULL
 #' @export
+#' @importFrom grDevices rgb
+#' @import scatterplot3d
 
 normalMDS <- function(plot, view) {
     mat <- as.matrix(plot[ ,c("X1", "X2", "X3")])

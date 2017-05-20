@@ -10,10 +10,9 @@
 Performs the tSNE plots for the hematological malagnancies dataset.
 }
 \examples{
-#tsnePlots()
+\dontrun{tsnePlots()}
 }
 \author{
 Jason Serviss
 }
 \keyword{tsnePlots}
-

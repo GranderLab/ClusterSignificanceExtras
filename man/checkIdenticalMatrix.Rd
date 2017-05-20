@@ -11,12 +11,13 @@
 \item{ident}{A boolean value. Do not alter.}
 }
 \description{
-This function takes an input matrix (mat), typically from \code{\link{makeMarix}},
-and an array contaning other matrices (otherMatrices) of the same dimensionality.
-The function checks if the matrix is identical to any of the other matrices submitted.
-This was designed for running replicate experiments when each replicate should be unique
-and is used with the \code{\link{overlapMatrices}}, \code{\link{overlapProbability}}, and
-\code{\link{zeroOrHundred}} functions.
+This function takes an input matrix (mat), typically from
+\code{\link{makeMatrix}}, and an array contaning other matrices
+(otherMatrices) of the same dimensionality. The function checks if the matrix
+is identical to any of the other matrices submitted. This was designed for
+running replicate experiments when each replicate should be unique and is
+used with the \code{\link{overlapMatrices}},
+\code{\link{overlapProbability}}, and \code{\link{zeroOrHundred}} functions.
 }
 \examples{
 mat <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10, seed=11)
@@ -25,11 +26,16 @@ otherMatrices[,,1] <- mat[[1]]
 checkIdenticalMatrix(mat, otherMatrices)
 
 otherMatrices <- array(NA, dim=c(20, 2, 1))
-otherMatrices[,,1] <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10, seed=50)[[1]]
+otherMatrices[,,1] <- makeMatrix(
+   x=c(0,1),
+   y=c(0,1),
+   dim=2,
+   points=10,
+   seed=50
+)[[1]]
 checkIdenticalMatrix(mat, otherMatrices)
 }
 \author{
 Jason Serviss
 }
 \keyword{checkIdenticalDims}
-

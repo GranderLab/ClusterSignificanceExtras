@@ -4,13 +4,17 @@
 \alias{overlapMatrices}
 \title{Overlap Specific Matrices}
 \arguments{
-\item{reps}{The desired number of overlap specific matrices to generate for each overlap.}
+\item{reps}{The desired number of overlap specific matrices to generate for
+each overlap.}
 
-\item{overlaps}{A numerical vector containing all of the overlaps to be generated.}
+\item{overlaps}{A numerical vector containing all of the overlaps to be
+generated.}
 
-\item{dim}{The number of dimensions (columns) to generate. Passed to the makeMatrix function.}
+\item{dim}{The number of dimensions (columns) to generate. Passed to the
+makeMatrix function.}
 
-\item{points}{The number of data points in each group. Passed to the makeMatrix function.}
+\item{points}{The number of data points in each group. Passed to the
+makeMatrix function.}
 
 \item{by}{Passed to the \code{\link{makeMatrix}} function.}
 
@@ -19,21 +23,32 @@
 \item{save}{Should output be saved?}
 }
 \description{
-Generates matrices where the groups have a specific percentage of overlap with each other.
+Generates matrices where the groups have a specific percentage of overlap
+with each other.
 }
 \details{
-The function generates overlap specific matrices. It can do this either for a specific
-overlap or many at once. It is also capable of generating replicates for a single overlap value.
-All matrices must pass multiple tests before they are accepted with which tests they must pass being
-dependant on the desired overlap. This function has only been tested with the \code{dim}, \code{points},
-and \code{by} values set to their defaults as it utilizes the \code{\link{overlapProbability}} output and
-the \code{\link{dynamicXY}} function.
+The function generates overlap specific matrices. It can do this either for a
+specific overlap or many at once. It is also capable of generating replicates
+for a single overlap value. All matrices must pass multiple tests before they
+are accepted with which tests they must pass being dependant on the desired
+overlap. This function has only been tested with the \code{dim},
+\code{points}, and \code{by} values set to their defaults as it utilizes the
+\code{\link{overlapProbability}} output and the \code{\link{dynamicXY}}
+function.
 }
 \examples{
-matrices <- overlapMatrices(reps=2, overlaps=0, dim=2, points=10, save=FALSE, verbose=FALSE)
+
+matrices <- overlapMatrices(
+   reps=2,
+   overlaps=0,
+   dim=2,
+   points=10,
+   save=FALSE,
+   verbose=FALSE
+)
+
 }
 \author{
 Jason Serviss
 }
 \keyword{overlapMatrices}
-

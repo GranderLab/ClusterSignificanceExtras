@@ -87,7 +87,8 @@ extendToMatch <- function(source, destin) {
     s <- length(source)
     d <- length(destin)
     
-    # Assume that destin is a length when it is a single number and source is not
+    # Assume that destin is a length when it is a single number and source is
+    #not
     if(d==1 && s>1 && !is.null(as.numeric(destin)))
     d <- destin
     
@@ -157,6 +158,7 @@ NULL
 #' @export
 #' @importFrom doMC registerDoMC
 #' @importFrom foreach foreach %dopar% registerDoSEQ
+#' @importFrom methods new
 
 parallelCS <- function(
     mat,
@@ -210,7 +212,7 @@ parallelCS <- function(
         return(output)
     } else {
         message("trimming iterations")
-        output <- methods::new(
+        output <- new(
             "PermutationResults",
             scores.real=getData(output, "scores.real"),
             scores.vec=list(scores.vec[1:iter])

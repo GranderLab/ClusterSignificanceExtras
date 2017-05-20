@@ -22,4 +22,3 @@ Output from the sensitivityTest function with default arguments.
 \examples{
 sensitivityTestResults
 }
-

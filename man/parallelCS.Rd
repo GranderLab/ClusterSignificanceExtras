@@ -28,4 +28,3 @@ cat("no current examples")
 Jason Serviss
 }
 \keyword{parallelCS}
-

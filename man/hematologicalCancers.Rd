@@ -4,6 +4,8 @@
 \alias{hematologicalCancers}
 \title{Hematological Cancers}
 \arguments{
+\item{iterations}{Number of permutations.}
+
 \item{...}{Arguments to pass on.}
 }
 \description{
@@ -11,10 +13,9 @@ Downloads, processes, clusters, and runs ClusterSignificance on
 the hematological malagnancies dataset.
 }
 \examples{
-hematologicalCancers()
+\dontrun{hematologicalCancers()}
 }
 \author{
 Jason Serviss
 }
 \keyword{hematologicalCancers}
-

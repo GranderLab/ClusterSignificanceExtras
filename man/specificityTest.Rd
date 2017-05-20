@@ -4,10 +4,12 @@
 \alias{specificityTest}
 \title{Specificity test}
 \arguments{
-\item{interval}{The interval of points amounts that should be tested. i.e. 1 tests points
+\item{interval}{The interval of points amounts that should be tested. i.e. 1
+   tests points
 amounts \code{1:100}, 10 tests \code{seq(1, 100, 10)}, etc.}
 
-\item{iterations}{The number of iterations for each call to \code{\link[ClusterSignificance]{permute}}.}
+\item{iterations}{The number of iterations for each call to
+\code{\link[ClusterSignificance]{permute}}.}
 
 \item{cores}{The number of cores the test should be parallalized with.}
 
@@ -20,18 +22,17 @@ amounts \code{1:100}, 10 tests \code{seq(1, 100, 10)}, etc.}
 \description{
 This function performs the specificity test. This test is designed to
 determine the true negative rate of the Pcp method. To do this
-we utilize the hundred dataset which was derived using the \code{\link{zeroOrHundred}}
-function with argument \code{overlap}=100. The dataset includes matrices where
-the group's range overlap is 100% and thus we anticipate that no significant
-seperations should be found with Pcp. For each matrice, the
-permute function is run, using the Pcp method afterwhich,
+we utilize the hundred dataset which was derived using the
+\code{\link{zeroOrHundred}} function with argument \code{overlap}=100. The
+dataset includes matrices where the group's range overlap is 100% and thus we
+anticipate that no significant seperations should be found with Pcp. For each
+matrice, the permute function is run, using the Pcp method afterwhich,
 the resulting pvalue is recorded.
 }
 \examples{
-specificityTest(interval=50, iterations=1, cores=1, save=FALSE)
+\dontrun{specificityTest(interval=50, iterations=1, cores=1, save=FALSE)}
 }
 \author{
 Jason Serviss
 }
 \keyword{specificityTest}
-

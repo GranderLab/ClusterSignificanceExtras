@@ -4,28 +4,35 @@
 \alias{zeroOrHundred}
 \title{Zero or Hundred Matrix}
 \arguments{
-\item{overlap}{The desired numerical overlap to be generated. Can be either 0 or 100.}
+\item{overlap}{The desired numerical overlap to be generated. Can be either 0
+or 100.}
 
-\item{dim}{The number of desired spatial dimensions for each groups points to occupy.}
+\item{dim}{The number of desired spatial dimensions for each groups points to
+occupy.}
 
-\item{reps}{The number of times a dataset for a specific number of points should be generated.}
+\item{reps}{The number of times a dataset for a specific number of points
+should be generated.}
 
-\item{p}{The interval of points per group for which datasets should be generated.}
+\item{p}{The interval of points per group for which datasets should be
+generated.}
 
-\item{verbose}{Logical indicating if the program should report status updates.}
+\item{verbose}{Logical indicating if the program should report status
+updates.}
 
-\item{save}{Logical indicating if the output should be saved to the data folder of the current directory.}
+\item{save}{Logical indicating if the output should be saved to the data
+folder of the current directory.}
 }
 \description{
 Creates the \emph{zero} or \emph{hundred} dataset.
 }
 \details{
-Creates one of two datasets; one where the 2 groups have 0 percent overlap with each other or
-one where the two groups have 100 percent overlap with each other. 0 percent, in this context,
-is defined as no datapoints from one group occupy the same space as the points of the other group.
-100 percent overlap is defined as one group completley containing the other group within the space
-that it occupies. For ClusterSignificance testing this function was run with the default paramaters
-for overlaps 0 and 100.
+Creates one of two datasets; one where the 2 groups have 0 percent overlap
+with each other or one where the two groups have 100 percent overlap with
+each other. 0 percent, in this context, is defined as no datapoints from one
+group occupy the same space as the points of the other group. 100 percent
+overlap is defined as one group completley containing the other group within
+the space that it occupies. For ClusterSignificance testing this function was
+run with the default paramaters for overlaps 0 and 100.
 }
 \examples{
 zeroOrHundred(overlap=0, reps=2, p=5:6, save=FALSE)
@@ -34,4 +41,3 @@ zeroOrHundred(overlap=0, reps=2, p=5:6, save=FALSE)
 Jason Serviss
 }
 \keyword{zeroOrHundred}
-

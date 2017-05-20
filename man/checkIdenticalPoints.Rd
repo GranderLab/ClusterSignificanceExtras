@@ -13,10 +13,11 @@
 \item{identicalPointsThreshold}{Sets the threshold of identical points.}
 }
 \description{
-This function takes an input matrix and checks if, for each group, the frequency
-of identical data points is greater than what is specified by the \emph{identicalPointsThreshold}
-argumet. If the number of identical points are less than the identicalPointsThreshold
-the function returns TRUE and, otherwise, returns FALSE.
+This function takes an input matrix and checks if, for each group, the
+frequency of identical data points is greater than what is specified by the
+\emph{identicalPointsThreshold} argumet. If the number of identical points
+are less than the identicalPointsThreshold the function returns TRUE and,
+otherwise, returns FALSE.
 }
 \examples{
 mat <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10, seed=11)
@@ -31,4 +32,3 @@ checkIdenticalPoints(mat, groups, 1, 2)
 Jason Serviss
 }
 \keyword{checkIdenticalPoints}
-

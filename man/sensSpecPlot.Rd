@@ -21,4 +21,3 @@ sensSpecPlot()
 Jason Serviss
 }
 \keyword{sensSpecPlot}
-

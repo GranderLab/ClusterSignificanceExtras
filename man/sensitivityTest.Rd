@@ -4,10 +4,12 @@
 \alias{sensitivityTest}
 \title{Sensitivity test}
 \arguments{
-\item{interval}{The interval of points amounts that should be tested. i.e. 1 tests points
+\item{interval}{The interval of points amounts that should be tested. i.e. 1
+   tests points
 amounts \code{1:100}, 10 tests \code{seq(1, 100, 10)}, etc.}
 
-\item{iterations}{The number of iterations for each call to \code{\link[ClusterSignificance]{permute}}.}
+\item{iterations}{The number of iterations for each call to
+\code{\link[ClusterSignificance]{permute}}.}
 
 \item{cores}{The number of cores the test should be parallalized with.}
 
@@ -20,18 +22,17 @@ amounts \code{1:100}, 10 tests \code{seq(1, 100, 10)}, etc.}
 \description{
 This function performs the sensitivity test. This test is designed to
 determine the true positive rate of the Pcp and Mlp methods. To do this
-we utilize the zero dataset which was derived using the \code{\link{zeroOrHundred}}
-function with argument \code{overlap}=0. The dataset includes matrices where
-the groups overlap is 0% and thus we anticipate that significant
-seperations should be found with Pcp or Mlp for all matrices. For each
-matrice, the permute function is run, using both the Pcp and Mlp methods
-afterwhich, the resulting pvalue is recorded.
+we utilize the zero dataset which was derived using the
+\code{\link{zeroOrHundred}} function with argument \code{overlap}=0. The
+dataset includes matrices where the groups overlap is 0% and thus we
+anticipate that significant seperations should be found with Pcp or Mlp for
+all matrices. For each matrice, the permute function is run, using both the
+Pcp and Mlp methods afterwhich, the resulting pvalue is recorded.
 }
 \examples{
-sensitivityTest(interval=50, iterations=1, cores=1, save=FALSE)
+\dontrun{sensitivityTest(interval=50, iterations=1, cores=1, save=FALSE)}
 }
 \author{
 Jason Serviss
 }
 \keyword{sensitivityTest}
-

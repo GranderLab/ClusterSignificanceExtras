@@ -1,6 +1,6 @@
 
-#' Output from the zeroOrHundred function with overlap argument = 100 and other default arguments.
-#'
+#' Output from the zeroOrHundred function with overlap argument = 100 and other
+#' default arguments.
 #'
 #' @title Hundred overlap dataset.
 #' @docType data
@@ -8,7 +8,9 @@
 #' @format list of arrays
 #' \describe{
 #' \item{list names}{The number of points per group.}
-#' \item{list elements}{An array containing all repititions of the ClusterSignificance input matrix for the specific points number indicated in the list element name}
+#' \item{list elements}{An array containing all repititions of the
+#'    ClusterSignificance input matrix for the specific points number indicated
+#'    in the list element name}
 #' \item{array dimension 1}{Rows of the input matrix to ClusterSignificance.}
 #' \item{array dimension 2}{Columns of the input matrix to ClusterSignificance.}
 #' \item{array dimension 3}{The repititions for each points per group amounts.}
@@ -20,8 +22,8 @@
 #'
 NULL
 
-#' Output from the zeroOrHundred function with overlap argument = 0 and other default arguments.
-#'
+#' Output from the zeroOrHundred function with overlap argument = 0 and other
+#' default arguments.
 #'
 #' @title Zero overlap dataset.
 #' @docType data
@@ -29,7 +31,9 @@ NULL
 #' @format list of arrays
 #' \describe{
 #' \item{list names}{The number of points per group.}
-#' \item{list elements}{An array containing all repititions of the ClusterSignificance input matrix for the specific points number indicated in the list element name}
+#' \item{list elements}{An array containing all repititions of the
+#'    ClusterSignificance input matrix for the specific points number indicated
+#'    in the list element name}
 #' \item{array dimension 1}{Rows of the input matrix to ClusterSignificance.}
 #' \item{array dimension 2}{Columns of the input matrix to ClusterSignificance.}
 #' \item{array dimension 3}{The repititions for each points per group amounts.}
@@ -62,8 +66,8 @@ NULL
 #' hemCancData
 NULL
 
-#' A character vector of lncRNA ensembl IDs included in the hematological cancer analysis.
-#'
+#' A character vector of lncRNA ensembl IDs included in the hematological cancer
+#' analysis.
 #'
 #' @title lncRNAs dataset.
 #' @docType data
@@ -135,4 +139,17 @@ NULL
 #' @return PermutationResults
 #' @examples
 #' pcpPermutations
+NULL
+
+#' Output from overlapProbability function.
+#'
+#'
+#' @title Run with default settings.
+#' @docType data
+#' @name overlapTable
+#' @format data.frame
+#' @usage overlapTable
+#' @return A table describinf how to set x1 to achieve a specific overlap.
+#' @examples
+#' overlapTable
 NULL

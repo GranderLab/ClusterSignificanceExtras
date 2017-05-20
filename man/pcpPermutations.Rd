@@ -17,4 +17,3 @@ ClusterSignificance permute output from the pcpMatrix dataset.
 \examples{
 pcpPermutations
 }
-

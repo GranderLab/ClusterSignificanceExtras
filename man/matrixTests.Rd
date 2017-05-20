@@ -16,25 +16,29 @@
 
 \item{by}{The \code{by} variable to the \code{\link{makeMatrix}} function.}
 
-\item{seed}{The \code{seed} variable to the \code{\link{makeMatrix}} function.}
+\item{seed}{The \code{seed} variable to the \code{\link{makeMatrix}}
+function.}
 
-\item{otherMatrices}{Input to the \code{\link{checkIdenticalMatrix}} function.}
+\item{otherMatrices}{Input to the \code{\link{checkIdenticalMatrix}}
+function.}
 
 \item{desiredOverlap}{The desired group overlap.}
 
-\item{interspersionThreshold}{Input to the \code{\link{interspersion}} function.}
+\item{interspersionThreshold}{Input to the \code{\link{interspersion}}
+function.}
 
-\item{idPointsThreshold}{Input to the \code{\link{checkIdenticalDims}} function.}
+\item{idPointsThreshold}{Input to the \code{\link{checkIdenticalDims}}
+function.}
 
 \item{verbose}{Logical if the function should be verbose. Mostly for testing.}
 }
 \description{
-A wrapper for all matrix checks. The function also handles "regeneration", i.e.
-if a matrix does \strong{not} pass the checks that it should, it is regenerated
-until it does. Which tests should be run is controled by the \code{tests} arguement.
+A wrapper for all matrix checks. The function also handles "regeneration",
+i.e. if a matrix does \strong{not} pass the checks that it should, it is
+regenerated until it does. Which tests should be run is controled by the
+\code{tests} arguement.
 }
 \author{
 Jason Serviss
 }
 \keyword{matrixTests}
-

@@ -11,13 +11,14 @@
 \item{...}{Arguments to pass on.}
 }
 \description{
-This function makes the \code{groups} input variable to ClusterSignificance from a
-\code{\link{makeMatrix}} generated matrix.
+This function makes the \code{groups} input variable to ClusterSignificance
+from a \code{\link{makeMatrix}} generated matrix.
 }
 \details{
-This function is specifically designed for the generation of the groups argument corresponding
-to the output from the \code{\link{makeMatrix}} function. It always results in 2 groups with
-each group being assigned an equal amount of points in the matrix.
+This function is specifically designed for the generation of the groups
+argument corresponding to the output from the \code{\link{makeMatrix}}
+function. It always results in 2 groups with each group being assigned an
+equal amount of points in the matrix.
 }
 \examples{
 mat <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10)
@@ -27,4 +28,3 @@ groups <- makeGroups(mat, names=c("grp1", "grp2"))
 Jason Serviss
 }
 \keyword{makeGroups}
-

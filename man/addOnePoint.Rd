@@ -14,10 +14,11 @@
 Adds one point to each group in the matrix.
 }
 \details{
-This function is designed to add one point in each dimension per group to the current matrix.
-The points that are added are done so with a call to \code{\link{makeMatrix}} where the \code{x}
-and \code{y} arguments are identical to the origional matrix. The function is primairly designed
-to work with the \code{\link{zeroOrHundred}} function.
+This function is designed to add one point in each dimension per group to the
+current matrix. The points that are added are done so with a call to
+\code{\link{makeMatrix}} where the \code{x} and \code{y} arguments are
+identical to the origional matrix. The function is primairly designed to work
+with the \code{\link{zeroOrHundred}} function.
 }
 \examples{
 mat <- makeMatrix(x=c(0,100), y=c(0, 100), dim=2, points=10)
@@ -28,4 +29,3 @@ matPlus <- addOnePoint(mat, groups)
 Jason Serviss
 }
 \keyword{addOnePoint}
-

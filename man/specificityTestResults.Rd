@@ -22,4 +22,3 @@ Output from the specificityTest function with default arguments.
 \examples{
 specificityTestResults
 }
-

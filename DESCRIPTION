@@ -1,8 +1,9 @@
 Package: ClusterSignificanceExtras
-Title: A package allowing re-creation of all figures in the publication associated with the ClusterSignificance package.
+Title: A package allowing re-creation of all figures in the publication associated with the ClusterSignificance package
 Version: 0.0.0.9000
-Author: Jason T. Serviss
-Maintainer: Jason T Serviss <jason.serviss@ki.se>
+Authors@R: c(
+    person("Jason T.", "Serviss", email = "jason.serviss@ki.se", role = c("aut", "cre")),
+    person("Jesper R.", "Gadin", email = "jesper.gadin@ki.se", role = "ctb")) 
 Description: Testing results and tools for testing the ClusterSignificance
     package.
 Depends:
@@ -18,9 +19,15 @@ Imports:
     gpclib,
     phonTools,
     ggthemes,
-    ggplot2
+    ggplot2,
+    GEOquery,
+    Rtsne,
+    biomaRt,
+    scatterplot3d,
+    methods,
+    Biobase
 Suggests:
     testthat
 License: GPL-3
 LazyData: true
-RoxygenNote: 5.0.1.9000
+RoxygenNote: 6.0.1

@@ -12,9 +12,9 @@ lncGenes
 character vector
 }
 \description{
-A character vector of lncRNA ensembl IDs included in the hematological cancer analysis.
+A character vector of lncRNA ensembl IDs included in the hematological cancer
+analysis.
 }
 \examples{
 lncGenes
 }
-

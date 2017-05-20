@@ -1,7 +1,8 @@
 
 #' Make Matrix
 #'
-#' This function is specifically designed for the generation of 2 groups of points within a matrix.
+#' This function is specifically designed for the generation of 2 groups of
+#' points within a matrix.
 #'
 #' Makes a matrix containing data for two groups of points.
 #' Specifying a specific number of points, dimensions, and range
@@ -12,12 +13,14 @@
 #' @name makeMatrix
 #' @rdname makeMatrix
 #' @aliases makeMatrix
-#' @param x A numerical vector of length 2 specifying the range of values possible for group 1.
-#' @param y A numerical vector of length 2 specifying the range of values possible for group 2.
+#' @param x A numerical vector of length 2 specifying the range of values
+#'    possible for group 1.
+#' @param y A numerical vector of length 2 specifying the range of values
+#'    possible for group 2.
 #' @param dim The number of dimensions (columns) to generate.
 #' @param points The number of data points in each group.
-#' @param by Indicates the frequency of ponts which are subsequently randomly picked according
-#' to the \emph{points} argument.
+#' @param by Indicates the frequency of ponts which are subsequently randomly
+#'    picked according to the \emph{points} argument.
 #' @param seed Sets the seed to make results reproducible.
 #' @param replace Passed to the \code{\link[base]{sample}} function.
 #' @param ... Arguments to pass on.
@@ -45,8 +48,8 @@ makeMatrix <- function(
     #results from the sample calls are concatenated
     #calls to sample randomly pick numbers between the values for x and y
     #the number of points picked by sample is governed by the points argument
-    #finally, results from sample calls are formated into a matrix with the expected
-    # ClusterSignificance structure.
+    #finally, results from sample calls are formated into a matrix with the
+    # expected ClusterSignificance structure.
     mat <- matrix(
         c(
             sapply(1:dim, function(xi)
@@ -80,12 +83,13 @@ makeMatrix <- function(
 
 #' Make Groups
 #'
-#' This function makes the \code{groups} input variable to ClusterSignificance from a
-#' \code{\link{makeMatrix}} generated matrix.
+#' This function makes the \code{groups} input variable to ClusterSignificance
+#' from a \code{\link{makeMatrix}} generated matrix.
 #'
-#' This function is specifically designed for the generation of the groups argument corresponding
-#' to the output from the \code{\link{makeMatrix}} function. It always results in 2 groups with
-#' each group being assigned an equal amount of points in the matrix.
+#' This function is specifically designed for the generation of the groups
+#' argument corresponding to the output from the \code{\link{makeMatrix}}
+#' function. It always results in 2 groups with each group being assigned an
+#' equal amount of points in the matrix.
 #'
 #' @name makeGroups
 #' @rdname makeGroups
@@ -137,30 +141,46 @@ makeGroups <- function(
 
 #' Overlap Specific Matrices
 #'
-#' Generates matrices where the groups have a specific percentage of overlap with each other.
+#' Generates matrices where the groups have a specific percentage of overlap
+#' with each other.
 #'
-#' The function generates overlap specific matrices. It can do this either for a specific
-#' overlap or many at once. It is also capable of generating replicates for a single overlap value.
-#' All matrices must pass multiple tests before they are accepted with which tests they must pass being
-#' dependant on the desired overlap. This function has only been tested with the \code{dim}, \code{points},
-#' and \code{by} values set to their defaults as it utilizes the \code{\link{overlapProbability}} output and
-#' the \code{\link{dynamicXY}} function.
+#' The function generates overlap specific matrices. It can do this either for a
+#' specific overlap or many at once. It is also capable of generating replicates
+#' for a single overlap value. All matrices must pass multiple tests before they
+#' are accepted with which tests they must pass being dependant on the desired
+#' overlap. This function has only been tested with the \code{dim},
+#' \code{points}, and \code{by} values set to their defaults as it utilizes the
+#' \code{\link{overlapProbability}} output and the \code{\link{dynamicXY}}
+#' function.
 #'
 #'
 #' @name overlapMatrices
 #' @rdname overlapMatrices
 #' @aliases overlapMatrices
-#' @param reps The desired number of overlap specific matrices to generate for each overlap.
-#' @param overlaps A numerical vector containing all of the overlaps to be generated.
-#' @param dim The number of dimensions (columns) to generate. Passed to the makeMatrix function.
-#' @param points The number of data points in each group. Passed to the makeMatrix function.
+#' @param reps The desired number of overlap specific matrices to generate for
+#'    each overlap.
+#' @param overlaps A numerical vector containing all of the overlaps to be
+#'    generated.
+#' @param dim The number of dimensions (columns) to generate. Passed to the
+#'    makeMatrix function.
+#' @param points The number of data points in each group. Passed to the
+#'    makeMatrix function.
 #' @param by Passed to the \code{\link{makeMatrix}} function.
 #' @param verbose Should the function be verbose?
 #' @param save Should output be saved?
 #' @author Jason Serviss
 #' @keywords overlapMatrices
 #' @examples
-#' matrices <- overlapMatrices(reps=2, overlaps=0, dim=2, points=10, save=FALSE, verbose=FALSE)
+#'
+#' matrices <- overlapMatrices(
+#'    reps=2,
+#'    overlaps=0,
+#'    dim=2,
+#'    points=10,
+#'    save=FALSE,
+#'    verbose=FALSE
+#' )
+#'
 NULL
 #' @export
 
@@ -202,8 +222,8 @@ overlapMatrices <- function(
         if(verbose == TRUE) {message(y)}
         
         ##make otherMatrices variable for this y
-        ##the otherMatrices variable keeps track of previously generated matrices
-        ##it is fed into the matrix tests which checks to make sure
+        ##the otherMatrices variable keeps track of previously generated
+        ##matrices it is fed into the matrix tests which checks to make sure
         ##that no matrices in different reprtitions are identical.
         otherMatrices <- array(
             0,
@@ -235,12 +255,13 @@ overlapMatrices <- function(
                 )
             )
             
-            #specify which tests should be performed on the matrix and perform them
-            #if the desired overlap is 100, additional tests are added
+            #specify which tests should be performed on the matrix and perform
+            #them if the desired overlap is 100, additional tests are added
             #otherwise the "standard" tests are used
-            #note that if the matrix does NOT pass one or more of the tests a new
-            #matrix is generated within the testing function and re-tested and that
-            #this is repeated until the matrix passes all tests, then it is returned here
+            #note that if the matrix does NOT pass one or more of the tests a
+            #new matrix is generated within the testing function and re-tested
+            #and that this is repeated until the matrix passes all tests, then
+            #it is returned here
             if(y==100){
                 tests <- "all"
                 interspersionThreshold <- 50
@@ -295,16 +316,18 @@ overlapMatrices <- function(
 
 #' Dynamic X and Y setter
 #'
-#' This function allows the dynamic adjustment of X and Y values in the \code{\link{makeMatrix}}
-#' function dependant on the desired group overlap. It uses a previously generated table from the
-#' \code{\link{overlapProbability}} function. The use of this function allows much faster generation of
-#' matrices with a specific group overlap than if the computer were to need to randomly try
-#' X and Y values until the overlap was generated. Y values are currently always (0,101) and
-#' X2 values are always x1 + 100. Is appropriate only to use when the points argument to
-#' \code{\link{makeMatrix}} is 102 and the by argument in 0.9. The returned X and Y values have
-#' been optimized to have the highest probability to generate the same overlap in both dimensions
-#' of the matrix i.e. when the \code{\link{makeMatrix}} argument \code{dim} is set to 2.
-#'
+#' This function allows the dynamic adjustment of X and Y values in the
+#' \code{\link{makeMatrix}} function dependant on the desired group overlap. It
+#' uses a previously generated table from the \code{\link{overlapProbability}}
+#' function. The use of this function allows much faster generation of matrices
+#' with a specific group overlap than if the computer were to need to randomly
+#' try X and Y values until the overlap was generated. Y values are currently
+#' always (0,101) and X2 values are always x1 + 100. Is appropriate only to use
+#' when the points argument to \code{\link{makeMatrix}} is 102 and the by
+#' argument in 0.9. The returned X and Y values have been optimized to have the
+#' highest probability to generate the same overlap in both dimensions of the
+#' matrix i.e. when the \code{\link{makeMatrix}} argument \code{dim} is set to
+#' 2.
 #'
 #' @name dynamicXY
 #' @rdname dynamicXY
@@ -313,11 +336,11 @@ overlapMatrices <- function(
 #' @author Jason Serviss
 #' @keywords dynamicXY
 #' @examples
-#' XY <- dynamicXY(overlapTable, desiredOverlap = 0)
-#' mat <- makeMatrix(XY[[1]], XY[[2]], dim=2, points=102)[[1]]
+#' XY <- dynamicXY(desiredOverlap = 0)
+#' mat <- makeMatrix(XY[[1]], XY[[2]], dim=2, points=102)
 #' groups <- makeGroups(mat, names=c("grp1", "grp2"))
-#' calculateOverlap(mat[ ,1], groups) #overlap dimension 1
-#' calculateOverlap(mat[ ,2], groups) #overlap dimension 2
+#' calculateOverlap(mat[[1]][ ,1], groups) #overlap dimension 1
+#' calculateOverlap(mat[[1]][ ,2], groups) #overlap dimension 2
 NULL
 #' @export
 
@@ -392,10 +415,11 @@ dynamicXY <- function(
 #'
 #' Adds one point to each group in the matrix.
 #'
-#' This function is designed to add one point in each dimension per group to the current matrix.
-#' The points that are added are done so with a call to \code{\link{makeMatrix}} where the \code{x}
-#' and \code{y} arguments are identical to the origional matrix. The function is primairly designed
-#' to work with the \code{\link{zeroOrHundred}} function.
+#' This function is designed to add one point in each dimension per group to the
+#' current matrix. The points that are added are done so with a call to
+#' \code{\link{makeMatrix}} where the \code{x} and \code{y} arguments are
+#' identical to the origional matrix. The function is primairly designed to work
+#' with the \code{\link{zeroOrHundred}} function.
 #'
 #' @name addOnePoint
 #' @rdname addOnePoint
@@ -463,22 +487,29 @@ addOnePoint <- function(
 #'
 #' Creates the \emph{zero} or \emph{hundred} dataset.
 #'
-#' Creates one of two datasets; one where the 2 groups have 0 percent overlap with each other or
-#' one where the two groups have 100 percent overlap with each other. 0 percent, in this context,
-#' is defined as no datapoints from one group occupy the same space as the points of the other group.
-#' 100 percent overlap is defined as one group completley containing the other group within the space
-#' that it occupies. For ClusterSignificance testing this function was run with the default paramaters
-#' for overlaps 0 and 100.
+#' Creates one of two datasets; one where the 2 groups have 0 percent overlap
+#' with each other or one where the two groups have 100 percent overlap with
+#' each other. 0 percent, in this context, is defined as no datapoints from one
+#' group occupy the same space as the points of the other group. 100 percent
+#' overlap is defined as one group completley containing the other group within
+#' the space that it occupies. For ClusterSignificance testing this function was
+#' run with the default paramaters for overlaps 0 and 100.
 #'
 #' @name zeroOrHundred
 #' @rdname zeroOrHundred
 #' @aliases zeroOrHundred
-#' @param overlap The desired numerical overlap to be generated. Can be either 0 or 100.
-#' @param dim The number of desired spatial dimensions for each groups points to occupy.
-#' @param reps The number of times a dataset for a specific number of points should be generated.
-#' @param p The interval of points per group for which datasets should be generated.
-#' @param verbose Logical indicating if the program should report status updates.
-#' @param save Logical indicating if the output should be saved to the data folder of the current directory.
+#' @param overlap The desired numerical overlap to be generated. Can be either 0
+#'    or 100.
+#' @param dim The number of desired spatial dimensions for each groups points to
+#'    occupy.
+#' @param reps The number of times a dataset for a specific number of points
+#'    should be generated.
+#' @param p The interval of points per group for which datasets should be
+#'    generated.
+#' @param verbose Logical indicating if the program should report status
+#'    updates.
+#' @param save Logical indicating if the output should be saved to the data
+#'    folder of the current directory.
 #'
 #' @author Jason Serviss
 #' @keywords zeroOrHundred
@@ -532,8 +563,8 @@ zeroOrHundred <- function(
             
         } else {
             
-            #get the matrices corresponding to the previous points amount value so they
-            #can be added to.
+            #get the matrices corresponding to the previous points amount value
+            #so they can be added to.
             previousPoints <- output[[i-5]]
             otherMatrices <- array(0, dim=c(i*2, dim, reps))
             
@@ -541,8 +572,8 @@ zeroOrHundred <- function(
             for(j in 1:reps){
                 if(verbose == TRUE) {print(paste("rep: ", j, sep=""))}
                 
-                #extract the matrix for the corresponding replicate with the previous points amount
-                #generate corresponding groups variable
+                #extract the matrix for the corresponding replicate with the
+                #previous points amount generate corresponding groups variable
                 mat <- previousPoints[,,j]
                 groups1 <- makeGroups(list(mat), names=c("grp1", "grp2"))
                 mat <- list(mat, x, y)
@@ -623,17 +654,24 @@ zeroOrHundred <- function(
 
 #' Overlap Probability Function
 #'
-#' This function generates a table that contains the probability of generating a specific overlap between groups
-#' when starting with a specific x value.
+#' This function generates a table that contains the probability of generating a
+#' specific overlap between groups when starting with a specific x value.
 #'
-#' The function works by examining probability of every x value from 0-100 by 0.9 to generate a matrix with a specific group
-#' overlap. x, in this case, is x[1] supplied to \code{\link{makeMatrix}} and x[2] = x[1] + 100. A matrix is generated \code{reps} times for each x
-#' using the \code{\link{makeMatrix}} function. The overlap between groups is then calculated. When this process completes, a lookup table is
-#' generated. Each x is listed in the lookup table together with the overlap generated in dimension 1 and 2. It was found that
-#' the same overlap is observed in each dimension and that the probability for each overlap is 100 percent (i.e. same overlap observed
-#' in all trials). The lookup table is output as a data frame, primiarly, for use by the \code{\link{overlapMatrices}} function.
-#' Note that the 100 percent overlap for both dims is missing from the table and is currently handled by the \code{\link{dymanicXY}} function.
-#' As well, the lookup table does include the 0 percent overlap but this is overridden by the \code{\link{dynamicXY}} function.
+#' The function works by examining probability of every x value from 0-100 by
+#' 0.9 to generate a matrix with a specific group overlap. x, in this case, is
+#' x[1] supplied to \code{\link{makeMatrix}} and x[2] = x[1] + 100. A matrix is
+#' generated \code{reps} times for each x using the \code{\link{makeMatrix}}
+#' function. The overlap between groups is then calculated. When this process
+#' completes, a lookup table is generated. Each x is listed in the lookup table
+#' together with the overlap generated in dimension 1 and 2. It was found that
+#' the same overlap is observed in each dimension and that the probability for
+#' each overlap is 100 percent (i.e. same overlap observed in all trials). The
+#' lookup table is output as a data frame, primiarly, for use by the
+#' \code{\link{overlapMatrices}} function. Note that the 100 percent overlap for
+#' both dims is missing from the table and is currently handled by the
+#' \code{\link{dynamicXY}} function. As well, the lookup table does include the
+#' 0 percent overlap but this is overridden by the \code{\link{dynamicXY}}
+#' function.
 #'
 #' @name overlapProbability
 #' @rdname overlapProbability
@@ -641,9 +679,10 @@ zeroOrHundred <- function(
 #' @author Jason Serviss
 #' @keywords overlapProbability
 #' @examples
-#' overlapProbability(save=FALSE, reps=2)
+#' \dontrun{overlapProbability(save=FALSE, reps=2)}
 NULL
 #' @export
+#' @importFrom plyr ddply summarize
 
 overlapProbability <- function(
     points = 102,
@@ -722,7 +761,8 @@ overlapProbability <- function(
                 )
                 
                 #the .savePointsOverlaps function reformats the data associated
-                #with the current matrix for subsequent adding to the output variable
+                #with the current matrix for subsequent adding to the output
+                #variable
                 add <- .savePointsOverlaps(
                     i,
                     c,
@@ -732,7 +772,8 @@ overlapProbability <- function(
                     mat
                 )
                 
-                #bind the current matrix and its associated data to the output variable
+                #bind the current matrix and its associated data to the output
+                #variable
                 pointsOverlaps <- rbind(
                     pointsOverlaps,
                     add
@@ -746,19 +787,20 @@ overlapProbability <- function(
     #below we examine, for each x1, which overlap is most commonly generated
     pointsOverlaps$overlap <- round(pointsOverlaps$overlap)
     
-    freq <- plyr::ddply(
+    freq <- ddply(
        pointsOverlaps,
        c("x1", "overlap"),
-       plyr::summarize,
+       summarize,
        freq=length(x1)
     )
     
-    #below we extract the x1 with the highest probability for giving a specific overlap
-    overlapTable <- plyr::ddply(
+    #below we extract the x1 with the highest probability for giving a specific
+    #overlap
+    overlapTable <- ddply(
        freq,
        "overlap",
        .fun = function(x)
-           plyr::summarise(
+           summarise(
                x,
                x[which(x$freq == max(x$freq)), 'x1']
            )[1:1,]
@@ -837,6 +879,7 @@ overlapProbability <- function(
 #'
 NULL
 #' @export
+#' @importFrom utils combn
 
 ## the permutation matrix function from ClusterSignificance
 ## takes a matrix as input, permutes the data x times, and outputs the result.
@@ -873,18 +916,19 @@ permMatrix <- function(
     return(permats)
 }
 
-############################################################################################################
-#                                                                                                          #
-#                                               Checks                                                     #
-#                                                                                                          #
-############################################################################################################
+################################################################################
+#                                                                              #
+# Checks                                                                       #
+#                                                                              #
+################################################################################
 
 
 #' Matrix Tests
 #'
-#' A wrapper for all matrix checks. The function also handles "regeneration", i.e.
-#' if a matrix does \strong{not} pass the checks that it should, it is regenerated
-#' until it does. Which tests should be run is controled by the \code{tests} arguement.
+#' A wrapper for all matrix checks. The function also handles "regeneration",
+#' i.e. if a matrix does \strong{not} pass the checks that it should, it is
+#' regenerated until it does. Which tests should be run is controled by the
+#' \code{tests} arguement.
 #'
 #' @name matrixTests
 #' @rdname matrixTests
@@ -897,11 +941,15 @@ permMatrix <- function(
 #' @param dim The dimensions (colums) of the input matrix.
 #' @param points The number of points per group in the input matrix.
 #' @param by The \code{by} variable to the \code{\link{makeMatrix}} function.
-#' @param seed The \code{seed} variable to the \code{\link{makeMatrix}} function.
-#' @param otherMatrices Input to the \code{\link{checkIdenticalMatrix}} function.
+#' @param seed The \code{seed} variable to the \code{\link{makeMatrix}}
+#'    function.
+#' @param otherMatrices Input to the \code{\link{checkIdenticalMatrix}}
+#'    function.
 #' @param desiredOverlap The desired group overlap.
-#' @param interspersionThreshold Input to the \code{\link{interspersion}} function.
-#' @param idPointsThreshold Input to the \code{\link{checkIdenticalDims}} function.
+#' @param interspersionThreshold Input to the \code{\link{interspersion}}
+#'    function.
+#' @param idPointsThreshold Input to the \code{\link{checkIdenticalDims}}
+#'    function.
 #' @param verbose Logical if the function should be verbose. Mostly for testing.
 NULL
 #' @export
@@ -932,10 +980,11 @@ matrixTests <- function(
     
     iterations = 0
     
-    #the while loop below runs the desired tests and checks that the input matrix passes all tests
-    #at 2 points, the input matrix is checked to see if it has passed the tests thus far, if not
-    #a new matrix is generated (with the .regenerate funciton) and the tests are re-run. Once the
-    #matrix passes all tests it is returned.
+    #the while loop below runs the desired tests and checks that the input
+    #matrix passes all tests at 2 points, the input matrix is checked to see if
+    #it has passed the tests thus far, if not a new matrix is generated (with
+    #the .regenerate funciton) and the tests are re-run. Once the matrix passes
+    #all tests it is returned.
     while(TRUE) {
         testOutput <- list()
         
@@ -947,19 +996,31 @@ matrixTests <- function(
         if("checkIdenticalDims" %in% tests | "all" %in% tests) {
             testOutput <- c(testOutput, checkIdenticalDims(mat, groups))
             if(verbose == TRUE) {
-                print(paste("checkIdenticalDims: ", checkIdenticalDims(mat, groups), sep=""))
+                print(paste(
+                    "checkIdenticalDims: ",
+                    checkIdenticalDims(mat, groups),
+                    sep=""
+                ))
             }
         }
         
         #run identical matrix test
         if("checkIdenticalMatrix" %in% tests | "all" %in% tests) {
-            testOutput <- c(testOutput, checkIdenticalMatrix(mat, otherMatrices))
+            testOutput <- c(
+                testOutput,
+                checkIdenticalMatrix(mat, otherMatrices)
+            )
             if(verbose == TRUE) {
-                print(paste("checkIdenticalMatrix: ", checkIdenticalMatrix(mat, otherMatrices), sep=""))
+                print(paste(
+                    "checkIdenticalMatrix: ",
+                    checkIdenticalMatrix(mat, otherMatrices),
+                    sep=""
+                ))
             }
         }
         
-        #checks if the matrix has passed all tests thus far and, if not, regenerates the matrix
+        #checks if the matrix has passed all tests thus far and, if not,
+        #regenerates the matrix
         if(any(testOutput == FALSE)) {
             new <- .regenerate(x, y, dim, points, by, seed, verbose)
             mat <- new[[1]]
@@ -974,7 +1035,10 @@ matrixTests <- function(
             overlap1 <- calculateOverlap(mat[[1]][,1], groups)
             overlap2 <- calculateOverlap(mat[[1]][,2], groups)
 
-            testOutput <- c(testOutput, overlap1 == desiredOverlap & overlap2 == desiredOverlap)
+            testOutput <- c(
+                testOutput,
+                overlap1 == desiredOverlap & overlap2 == desiredOverlap
+            )
             
             if(verbose == TRUE) {
                 print(paste("overlaps:", overlap1, overlap2, sep=" "))
@@ -1025,7 +1089,17 @@ matrixTests <- function(
         iterations <- iterations + 1
     }
     
-    return(list(mat, groups, otherMatrices, desiredOverlap, dim, points, by, seed, iterations))
+    return(list(
+        mat,
+        groups,
+        otherMatrices,
+        desiredOverlap,
+        dim,
+        points,
+        by,
+        seed,
+        iterations
+    ))
 }
 
 #handles matrix regeneration
@@ -1054,14 +1128,16 @@ matrixTests <- function(
 #'
 #' Calculate the overlap between two groups.
 #'
-#' This function accepts a matrix containing data points for 2 groups where group 1
-#' occupies the top half of the matrix and group 2, the bottom half. It calculates and
-#' returns the overlap between the 2 groups. \emph{Overlap} in this case, is calculated dependant
-#' on the class of the mat argument. If the class of the mat argument is numeric and is one dimension
-#' form a \code{\link{makeMatrix}} matrix, then overlap refers to
-#' \eqn{100 * ((grp 1 points in grp2 range + grp2 points in grp1 range) / total number of points)}.
-#' If, on the other hand, the class of mat is \emph{makeMatrix} then the percentage of intersecting area
-#' between the two groups is calculated.
+#' This function accepts a matrix containing data points for 2 groups where
+#' group 1 occupies the top half of the matrix and group 2, the bottom half. It
+#' calculates and returns the overlap between the 2 groups. \emph{Overlap} in
+#' this case, is calculated dependant on the class of the mat argument. If the
+#' class of the mat argument is numeric and is one dimension form a
+#' \code{\link{makeMatrix}} matrix, then overlap refers to
+#' \eqn{100 * ((grp 1 points in grp2 range + grp2 points in grp1 range) /
+#' total number of points)}.
+#' If, on the other hand, the class of mat is \emph{makeMatrix} then the
+#' percentage of intersecting area between the two groups is calculated.
 #'
 #' @name calculateOverlap
 #' @rdname calculateOverlap
@@ -1080,6 +1156,8 @@ NULL
 #' @export
 #' @importFrom gpclib area.poly intersect
 #' @importClassesFrom gpclib gpc.poly
+#' @importFrom grDevices chull
+#' @importFrom methods as
 
 calculateOverlap <- function(
     mat,
@@ -1139,7 +1217,8 @@ calculateOverlap <- function(
     
     #intersecting are calculation
     #this first uses "convex hulls" to determine a shape for each group
-    #after the shape is determined, the intersecting area of the 2 shapes is calculated
+    #after the shape is determined, the intersecting area of the 2 shapes is
+    #calculated
     if(class(mat) == "makeMatrix") {
         #make a variable holding the matrix values for each group
         mat <- mat[[1]]
@@ -1159,7 +1238,8 @@ calculateOverlap <- function(
         area1 <- area.poly(p1)
         area2 <- area.poly(p2)
         
-        #find the intersecting area of each polygon and calculate the percentage of overlap
+        #find the intersecting area of each polygon and calculate the percentage
+        #of overlap
         areaIntersection <- area.poly(intersect(p1,p2))
         percentOverlap <- round(((areaIntersection * 2) / (area1 + area2)) * 100)
     }
@@ -1179,8 +1259,10 @@ calculateOverlap <- function(
 #' @name interspersion
 #' @rdname interspersion
 #' @aliases interspersion
-#' @param mat The mattrix to be checked. Usually a \code{\link{makeMatrix}} matrix.
-#' @param groups A character vector indicating the groups location within the matrix.
+#' @param mat The mattrix to be checked. Usually a \code{\link{makeMatrix}}
+#'    matrix.
+#' @param groups A character vector indicating the groups location within the
+#'    matrix.
 #' Can be generated with the makeGroups function.
 #' Can only accept 2 groups.
 #' @param dim Which dimention of the matrix to check.
@@ -1238,9 +1320,10 @@ interspersion <- function(
         which(names == "2")
     )
     
-    ##scale; here i divide range between the min and max possible interspersion into
-    ##100 elements. By performing the same calculation with the real data and then seeing
-    ##where it falls on the scale, I can determine the "percentage of interspersion".
+    ##scale; here i divide range between the min and max possible interspersion
+    ##into 100 elements. By performing the same calculation with the real data
+    ##and then seeing where it falls on the scale, I can determine the
+    ##"percentage of interspersion".
     s <- seq(
         min,
         max,
@@ -1258,7 +1341,8 @@ interspersion <- function(
         which(names(vector) == g[2])
     )
     
-    ##score; finds where the real score falls on the scale of the theoretical scale
+    ##score; finds where the real score falls on the scale of the theoretical
+    #scale
     score <- which.min(
         abs(s - real)
     ) - 1
@@ -1295,6 +1379,7 @@ interspersion <- function(
 #' checkIdenticalDims(mat, groups)
 NULL
 #' @export
+#' @importFrom utils combn
 
 checkIdenticalDims <- function(
     mat,
@@ -1338,12 +1423,13 @@ checkIdenticalDims <- function(
 
 #' Check Identical Matrices
 #'
-#' This function takes an input matrix (mat), typically from \code{\link{makeMarix}},
-#' and an array contaning other matrices (otherMatrices) of the same dimensionality.
-#' The function checks if the matrix is identical to any of the other matrices submitted.
-#' This was designed for running replicate experiments when each replicate should be unique
-#' and is used with the \code{\link{overlapMatrices}}, \code{\link{overlapProbability}}, and
-#' \code{\link{zeroOrHundred}} functions.
+#' This function takes an input matrix (mat), typically from
+#' \code{\link{makeMatrix}}, and an array contaning other matrices
+#' (otherMatrices) of the same dimensionality. The function checks if the matrix
+#' is identical to any of the other matrices submitted. This was designed for
+#' running replicate experiments when each replicate should be unique and is
+#' used with the \code{\link{overlapMatrices}},
+#' \code{\link{overlapProbability}}, and \code{\link{zeroOrHundred}} functions.
 #'
 #' @name checkIdenticalMatrix
 #' @rdname checkIdenticalMatrix
@@ -1360,7 +1446,13 @@ checkIdenticalDims <- function(
 #' checkIdenticalMatrix(mat, otherMatrices)
 #'
 #' otherMatrices <- array(NA, dim=c(20, 2, 1))
-#' otherMatrices[,,1] <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10, seed=50)[[1]]
+#' otherMatrices[,,1] <- makeMatrix(
+#'    x=c(0,1),
+#'    y=c(0,1),
+#'    dim=2,
+#'    points=10,
+#'    seed=50
+#' )[[1]]
 #' checkIdenticalMatrix(mat, otherMatrices)
 NULL
 #' @export
@@ -1391,10 +1483,11 @@ checkIdenticalMatrix <- function(
 
 #' Check Identical Points
 #'
-#' This function takes an input matrix and checks if, for each group, the frequency
-#' of identical data points is greater than what is specified by the \emph{identicalPointsThreshold}
-#' argumet. If the number of identical points are less than the identicalPointsThreshold
-#' the function returns TRUE and, otherwise, returns FALSE.
+#' This function takes an input matrix and checks if, for each group, the
+#' frequency of identical data points is greater than what is specified by the
+#' \emph{identicalPointsThreshold} argumet. If the number of identical points
+#' are less than the identicalPointsThreshold the function returns TRUE and,
+#' otherwise, returns FALSE.
 #'
 #'
 #' @name checkIdenticalPoints
@@ -1439,7 +1532,8 @@ checkIdenticalPoints <- function(
     spl <- split(m, groups)
     
     #calculate the frequency for points in each group
-    #as well, check if any of the requencies are greater than identicalPointsThreshold
+    #as well, check if any of the requencies are greater than
+    #identicalPointsThreshold
     bools <- logical()
     for(j in 1:length(spl)) {
         freq <- as.data.frame(table(spl[[j]]))$Freq
@@ -1450,11 +1544,11 @@ checkIdenticalPoints <- function(
     return(output)
 }
 
-############################################################################################################
-#                                                                                                          #
-#                                               Plotting                                                   #
-#                                                                                                          #
-############################################################################################################
+################################################################################
+#                                                                              #
+# Plotting                                                                     #
+#                                                                              #
+################################################################################
 
 #' Plot Overlaps
 #'
@@ -1465,14 +1559,15 @@ checkIdenticalPoints <- function(
 #' @rdname visualizeOverlaps
 #' @aliases visualizeOverlaps
 #' @param mat The matrix to be checked.
-#' @param groups A character vector indicating the groups location within the matrix. Can be generated with the makeGroups function.
+#' @param groups A character vector indicating the groups location within the
+#'    matrix. Can be generated with the makeGroups function.
 #' @author Jason Serviss
 #' @keywords visualizeOverlaps
 #' @examples
 #'
 #' x1 <- 0
 #' x2 <- x1+1
-#' mat <- makeMatrix(x=c(x1,x2), y=c(0,1), dim=2, points=10)[[1]]
+#' mat <- makeMatrix(x=c(x1,x2), y=c(0,1), dim=2, points=10)
 #' groups <- makeGroups(mat, names=c("grp1", "grp2"))
 #'
 #' visualizeOverlaps(mat, groups)
@@ -1483,7 +1578,8 @@ NULL
 #' @import ggplot2
 #' @importFrom reshape2 melt
 #' @importFrom ggthemes theme_few scale_colour_ptol
-#' @importFrom plyr ddply summarize
+#' @importFrom plyr ddply summarize as.quoted
+#' @importFrom stats median
 
 visualizeOverlaps <- function(
     mat,
@@ -1514,21 +1610,21 @@ visualizeOverlaps <- function(
             "groups",
             "variable"
         ),
-        plyr::summarize,
-        median = median(value),
-        min = min(value),
-        max = max(value)
+        summarize,
+        median = median(as.quoted(value)),
+        min = min(as.quoted(value)),
+        max = max(as.quoted(value))
     )
     
     if(plotType == "lines") {
         p <- ggplot(
             m2,
-            aes(
-                x = groups,
-                y = median,
-                colour = groups,
-                ymin = min,
-                ymax = max
+            aes_string(
+                x = 'groups',
+                y = 'median',
+                colour = 'groups',
+                ymin = 'min',
+                ymax = 'max'
             )
         )+
         geom_pointrange()+
@@ -1552,10 +1648,10 @@ visualizeOverlaps <- function(
     } else {
         p <- ggplot(
             mat,
-            aes(
-                x=dim1,
-                y=dim2,
-                colour=groups
+            aes_string(
+                x='dim1',
+                y='dim2',
+                colour='groups'
             )
         )+
         geom_point(size=cex, alpha=alpha)+

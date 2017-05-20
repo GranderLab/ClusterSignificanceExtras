@@ -10,10 +10,9 @@
 Plots the clustering of the normal and MDS cancer types.
 }
 \examples{
-#normalMDS()
+\dontrun{normalMDS()}
 }
 \author{
 Jason Serviss
 }
 \keyword{normalMDS}
-

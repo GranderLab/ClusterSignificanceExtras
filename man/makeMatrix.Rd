@@ -4,16 +4,18 @@
 \alias{makeMatrix}
 \title{Make Matrix}
 \arguments{
-\item{x}{A numerical vector of length 2 specifying the range of values possible for group 1.}
+\item{x}{A numerical vector of length 2 specifying the range of values
+possible for group 1.}
 
-\item{y}{A numerical vector of length 2 specifying the range of values possible for group 2.}
+\item{y}{A numerical vector of length 2 specifying the range of values
+possible for group 2.}
 
 \item{dim}{The number of dimensions (columns) to generate.}
 
 \item{points}{The number of data points in each group.}
 
-\item{by}{Indicates the frequency of ponts which are subsequently randomly picked according
-to the \emph{points} argument.}
+\item{by}{Indicates the frequency of ponts which are subsequently randomly
+picked according to the \emph{points} argument.}
 
 \item{seed}{Sets the seed to make results reproducible.}
 
@@ -22,7 +24,8 @@ to the \emph{points} argument.}
 \item{...}{Arguments to pass on.}
 }
 \description{
-This function is specifically designed for the generation of 2 groups of points within a matrix.
+This function is specifically designed for the generation of 2 groups of
+points within a matrix.
 }
 \details{
 Makes a matrix containing data for two groups of points.
@@ -37,4 +40,3 @@ mat <- makeMatrix(x=c(0,1), y=c(0,1), dim=2, points=10)
 Jason Serviss
 }
 \keyword{makeMatrix}
-

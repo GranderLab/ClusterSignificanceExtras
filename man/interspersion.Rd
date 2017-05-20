@@ -4,9 +4,11 @@
 \alias{interspersion}
 \title{Calculate interspersion}
 \arguments{
-\item{mat}{The mattrix to be checked. Usually a \code{\link{makeMatrix}} matrix.}
+\item{mat}{The mattrix to be checked. Usually a \code{\link{makeMatrix}}
+matrix.}
 
-\item{groups}{A character vector indicating the groups location within the matrix.
+\item{groups}{A character vector indicating the groups location within the
+   matrix.
 Can be generated with the makeGroups function.
 Can only accept 2 groups.}
 
@@ -32,4 +34,3 @@ interspersion(mat, groups, 1)
 Jason Serviss
 }
 \keyword{interspersion}
-

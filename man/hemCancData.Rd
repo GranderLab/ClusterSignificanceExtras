@@ -24,4 +24,3 @@ tSNE results from the hematological malagnancies anaysis.
 \examples{
 hemCancData
 }
-

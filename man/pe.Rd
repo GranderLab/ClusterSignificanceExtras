@@ -17,4 +17,3 @@ ClusterSignificance permute output from the hematological cancer dataset.
 \examples{
 pe
 }
-

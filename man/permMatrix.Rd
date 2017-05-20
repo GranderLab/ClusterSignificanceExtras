@@ -25,4 +25,3 @@ matPlus <- addOnePoint(mat, groups)
 Jason Serviss
 }
 \keyword{permMatrix}
-

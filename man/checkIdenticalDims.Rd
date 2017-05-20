@@ -32,4 +32,3 @@ checkIdenticalDims(mat, groups)
 Jason Serviss
 }
 \keyword{checkIdenticalDims}
-

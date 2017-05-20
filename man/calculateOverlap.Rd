@@ -14,14 +14,16 @@
 Calculate the overlap between two groups.
 }
 \details{
-This function accepts a matrix containing data points for 2 groups where group 1
-occupies the top half of the matrix and group 2, the bottom half. It calculates and
-returns the overlap between the 2 groups. \emph{Overlap} in this case, is calculated dependant
-on the class of the mat argument. If the class of the mat argument is numeric and is one dimension
-form a \code{\link{makeMatrix}} matrix, then overlap refers to
-\eqn{100 * ((grp 1 points in grp2 range + grp2 points in grp1 range) / total number of points)}.
-If, on the other hand, the class of mat is \emph{makeMatrix} then the percentage of intersecting area
-between the two groups is calculated.
+This function accepts a matrix containing data points for 2 groups where
+group 1 occupies the top half of the matrix and group 2, the bottom half. It
+calculates and returns the overlap between the 2 groups. \emph{Overlap} in
+this case, is calculated dependant on the class of the mat argument. If the
+class of the mat argument is numeric and is one dimension form a
+\code{\link{makeMatrix}} matrix, then overlap refers to
+\eqn{100 * ((grp 1 points in grp2 range + grp2 points in grp1 range) /
+total number of points)}.
+If, on the other hand, the class of mat is \emph{makeMatrix} then the
+percentage of intersecting area between the two groups is calculated.
 }
 \examples{
 mat <- makeMatrix(x=c(0,1), y=c(1.1,2.1), dim=2, points=20)
@@ -35,4 +37,3 @@ calculateOverlap(mat, groups)
 Jason Serviss
 }
 \keyword{calculateOverlap}
-
